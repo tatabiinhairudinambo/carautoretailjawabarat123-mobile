@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  ImageBackground,
   TouchableOpacity,
   StyleSheet,
   Linking,
@@ -11,27 +10,66 @@ import {
   StatusBar,
   useWindowDimensions,
   RefreshControl,
+  Image,
+  Animated,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import TestimonialCard from '../../components/TestimonialCard';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
-const stats = [
-  { value: '500+', label: 'Pelanggan', icon: 'star' },
-  { value: '50+', label: 'Armada', icon: 'car-sport' },
-  { value: '24/7', label: 'Support', icon: 'shield-checkmark' },
+const quickActions = [
+  { icon: 'wallet-outline', label: 'Booking', route: '/cars' },
+  { icon: 'paper-plane-outline', label: 'WhatsApp', action: 'wa' },
+  { icon: 'pricetag-outline', label: 'Promo', action: 'promo' },
+  { icon: 'time-outline', label: 'Riwayat', route: '/history' },
 ];
 
-const features = [
-  { icon: 'checkmark-circle', title: 'Armada Terawat', desc: 'Semua unit dicek berkala dan dalam kondisi prima' },
-  { icon: 'card', title: 'Harga Transparan', desc: 'Tidak ada biaya tersembunyi, semua jelas di awal' },
-  { icon: 'map', title: 'Area Jawa Barat', desc: 'Melayani seluruh wilayah Jawa Barat' },
-  { icon: 'flash', title: 'Booking Cepat', desc: 'Proses booking mudah dan cepat via WhatsApp' },
+const paymentList = [
+  { icon: 'car-sport', label: 'Harian', route: '/cars', color: '#ef4444' },
+  { icon: 'key', label: 'Lepas Kunci', route: '/cars', color: '#f59e0b' },
+  { icon: 'person', label: 'Plus Sopir', route: '/cars', color: '#10b981' },
+  { icon: 'map', label: 'Luar Kota', route: '/wilayah', color: '#3b82f6' },
+  { icon: 'heart', label: 'Wedding', route: '/cars', color: '#ec4899' },
+  { icon: 'business', label: 'Bulanan', route: '/cars', color: '#8b5cf6' },
+  { icon: 'shield-checkmark', label: 'Asuransi', route: '/tentang', color: '#06b6d4' },
+  { icon: 'grid', label: 'Semua Unit', route: '/cars', color: '#a855f7' },
+];
+
+const PROMO_CARS_FALLBACK = [
+  {
+    id: 'promo-1',
+    name: 'Agya / Ayla 1.2 GR',
+    brand: 'Toyota',
+    price: 250000,
+    transmission: 'Automatic',
+    passengers: 5,
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'promo-2',
+    name: 'Brio Satya E CVT',
+    brand: 'Honda',
+    price: 275000,
+    transmission: 'Automatic',
+    passengers: 5,
+    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'promo-3',
+    name: 'Avanza / Xenia Facelift',
+    brand: 'Toyota',
+    price: 300000,
+    transmission: 'Manual / AT',
+    passengers: 7,
+    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80'
+  },
 ];
 
 export default function HomeScreen() {
@@ -40,7 +78,39 @@ export default function HomeScreen() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Member');
+  const [promoCars, setPromoCars] = useState<any[]>(PROMO_CARS_FALLBACK);
   const isSmall = SCREEN_W < 375;
+
+  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const promoRef = React.useRef<FlatList>(null);
+  const promoIndexRef = React.useRef(0);
+  const isPausedRef = React.useRef(false);
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 160],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
+
+  const headerTextScale = scrollY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  const headerTextOpacity = scrollY.interpolate({
+    inputRange: [0, 110],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const stickyBarOpacity = scrollY.interpolate({
+    inputRange: [60, 130],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   const loadTestimonials = async () => {
     const { data } = await supabase.from('testimonials').select('*').limit(6);
@@ -48,312 +118,528 @@ export default function HomeScreen() {
     setTestimonialsLoading(false);
   };
 
+  const loadUserData = async () => {
+    try {
+      const savedAvatar = await AsyncStorage.getItem('user_avatar');
+      if (savedAvatar) setAvatarUrl(savedAvatar);
+      const savedName = await AsyncStorage.getItem('user_full_name');
+      if (savedName) setUserName(savedName);
+
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        if (data.user.user_metadata?.full_name) setUserName(data.user.user_metadata.full_name);
+        if (data.user.user_metadata?.avatar_url && !savedAvatar) setAvatarUrl(data.user.user_metadata.avatar_url);
+      }
+    } catch (e) { }
+  };
+
+  const loadPromoCars = async () => {
+    try {
+      const { data } = await supabase.from('cars').select('*').order('price', { ascending: true }).limit(8);
+      if (data && data.length > 0) setPromoCars(data);
+    } catch (e) { }
+  };
+
   useEffect(() => {
     loadTestimonials();
+    loadUserData();
+    loadPromoCars();
   }, []);
+
+  useEffect(() => {
+    if (promoCars.length <= 1) return;
+    const timer = setInterval(() => {
+      if (isPausedRef.current) return;
+      promoIndexRef.current = (promoIndexRef.current + 1) % promoCars.length;
+      const cardWidth = isSmall ? 246 : 276;
+      promoRef.current?.scrollToOffset({
+        offset: promoIndexRef.current * cardWidth,
+        animated: true,
+      });
+    }, 3200);
+    return () => clearInterval(timer);
+  }, [promoCars, isSmall]);
 
   const onRefresh = async () => {
     setRefreshing(true);
+    promoIndexRef.current = 0;
+    promoRef.current?.scrollToOffset({ offset: 0, animated: true });
+    await loadUserData();
     await loadTestimonials();
+    await loadPromoCars();
     setRefreshing(false);
   };
 
   const openWhatsApp = () => {
-    const msg = 'Halo, saya ingin informasi tentang rental mobil Anda.';
+    const msg = 'Halo Car Auto Retail, saya ingin informasi tentang rental mobil Anda.';
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
   };
 
   const claimPromo = () => {
-    const msg = 'Halo Car Auto Retail, saya ingin klaim promo diskon spesial 25% untuk sewa mobil pertama!';
+    const msg = 'Halo Car Auto Retail, saya ingin klaim promo penawaran spesial diskon 25%!';
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+  };
+
+  const handleQuickAction = (item: any) => {
+    if (item.action === 'wa') openWhatsApp();
+    else if (item.action === 'promo') claimPromo();
+    else if (item.route) router.push(item.route);
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#dc2626" colors={['#dc2626']} />}
-      >
-        {/* Hero */}
-        <ImageBackground
-          source={{ uri: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80' }}
-          style={[styles.hero, { minHeight: isSmall ? 500 : 600 }]}
-        >
-          <View style={styles.heroOverlay} />
-          <SafeAreaView edges={['top']} style={styles.heroContent}>
-            {/* Badge */}
-            {/* <View style={styles.badge}>
-              <Text style={styles.badgeDot}>●</Text>
-              <Text style={styles.badgeText}>Rental Mobil Terpercaya</Text>
-            </View> */}
+      <StatusBar barStyle="light-content" backgroundColor="#881337" />
 
-            <Text style={[styles.heroTitle, { fontSize: isSmall ? 28 : 36, lineHeight: isSmall ? 36 : 44 }]}>
-              Sewa Mobil Aman & Terpercaya di <Text style={styles.heroTitleAccent}>Jawa Barat</Text>
-            </Text>
-
-            <Text style={[styles.heroSubtitle, { fontSize: isSmall ? 13 : 15, lineHeight: isSmall ? 20 : 24 }]}>
-              Armada terbaik, harga terjangkau, pelayanan profesional untuk perjalanan pribadi & bisnis.
-            </Text>
-
-            {/* CTA Buttons */}
-            <View style={[styles.ctaButtons, isSmall && { flexDirection: 'column' }]}>
-              <TouchableOpacity
-                style={[styles.btnPrimary, isSmall && { width: '100%' }]}
-                onPress={() => router.push('/cars')}
-                activeOpacity={0.85}
-              >
-                <Text style={styles.btnPrimaryText}>🚗 Pilih Armada Sekarang</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Stats */}
-            <View style={styles.statsRow}>
-              {stats.map((s) => (
-                <View key={s.label} style={[styles.statCard, isSmall && { padding: 10 }]}>
-                  <Ionicons name={s.icon as any} size={isSmall ? 16 : 20} color="#ef4444" style={{ marginBottom: 6 }} />
-                  <Text style={[styles.statValue, isSmall && { fontSize: 17 }]}>{s.value}</Text>
-                  <Text style={styles.statLabel}>{s.label}</Text>
+      {/* Sticky Animated Glass Top Bar */}
+      <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
+          <View style={styles.stickyBarOverlay} />
+          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+            <TouchableOpacity style={styles.avatarWrapSmall} onPress={() => router.push('/akun')}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Ionicons name="person" size={16} color="#fff" />
                 </View>
-              ))}
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.stickyTitleRow}>
+              {/* <Image source={require('../../assets/logo.jpg')} style={styles.stickyMiniLogo} resizeMode="cover" /> */}
+              <Text style={styles.stickyBarTitle}>Car Auto Retail</Text>
             </View>
+
+            <TouchableOpacity style={styles.bellBtnSmall} onPress={() => router.push('/history')}>
+              <Ionicons name="notifications" size={18} color="#fff" />
+            </TouchableOpacity>
           </SafeAreaView>
         </ImageBackground>
+      </Animated.View>
 
-        {/* Promo Diskon Card Marketing */}
-        <View style={styles.promoContainer}>
-          <AnimatedCard delay={100} style={styles.promoCard} onPress={claimPromo}>
-            <View style={styles.promoContent}>
-              <View style={styles.promoBadgeRow}>
-                <View style={styles.promoBadge}>
-                  <Text style={styles.promoBadgeText}>PROMO SPESIAL</Text>
-                </View>
-                <Text style={styles.promoTimer}> Klaim Sekarang</Text>
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        {/* Top Gradient Header ala Rujukan */}
+        <Animated.View style={[styles.topHeaderWrap, { transform: [{ translateY: headerTranslateY }] }]}>
+          <ImageBackground
+            source={require('../../assets/logo.jpg')}
+            style={styles.topHeaderBg}
+            imageStyle={styles.topHeaderBgImg}
+          >
+            <View style={styles.topHeaderOverlay} />
+            <SafeAreaView edges={['top']} style={styles.topHeaderContent}>
+              <View style={styles.topNavRow}>
+                <TouchableOpacity style={styles.avatarWrap} onPress={() => router.push('/akun')} activeOpacity={0.8}>
+                  {avatarUrl ? (
+                    <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
+                  ) : (
+                    <View style={styles.avatarFallback}>
+                      <Ionicons name="person" size={20} color="#fff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.bellBtn} onPress={() => router.push('/history')} activeOpacity={0.8}>
+                  <Ionicons name="notifications" size={20} color="#fff" />
+                </TouchableOpacity>
               </View>
 
-              <Text style={[styles.promoTitle, isSmall && { fontSize: 18 }]}>Diskon s.d. 25% Sewa Mobil Pertama!</Text>
-              <Text style={[styles.promoSubtitle, isSmall && { fontSize: 12 }]}>
-                Nikmati potongan harga eksklusif untuk semua rute & unit armada di Jawa Barat. Tanpa ribet!
-              </Text>
+              <Animated.View style={[styles.balanceCenterWrap, { opacity: headerTextOpacity, transform: [{ scale: headerTextScale }] }]}>
+                <Text style={styles.balanceLabel}>Armada Tersedia Jabar</Text>
+                <Text style={[styles.balanceValue, isSmall && { fontSize: 36 }]}>50+ Unit</Text>
+              </Animated.View>
+            </SafeAreaView>
+          </ImageBackground>
+        </Animated.View>
 
-              <View style={styles.promoCtaBtn}>
-                <Ionicons name="pricetag" size={16} color="#fff" />
-                <Text style={styles.promoCtaText}>Klaim Voucher Promo</Text>
-                <Ionicons name="arrow-forward" size={16} color="#fff" />
-              </View>
+        {/* Floating Quick Action Pill */}
+        <View style={styles.floatingActionContainer}>
+          <AnimatedCard delay={100} style={styles.floatingActionCard}>
+            <View style={styles.quickActionRow}>
+              {quickActions.map((qa, i) => (
+                <TouchableOpacity
+                  key={qa.label}
+                  style={styles.quickActionItem}
+                  onPress={() => handleQuickAction(qa)}
+                  activeOpacity={0.75}
+                >
+                  <View style={styles.quickActionIconCircle}>
+                    <Ionicons name={qa.icon as any} size={22} color="#ef4444" />
+                  </View>
+                  <Text style={styles.quickActionText}>{qa.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </AnimatedCard>
         </View>
 
-        {/* Grid Menu Utama disembunyikan sesuai permintaan */}
-
-        {/* About Section */}
-        <View style={[styles.section, { padding: isSmall ? 16 : 24 }]}>
-          <View style={styles.sectionTagRow}>
-            <View style={styles.sectionTagLine} />
-            <Text style={styles.sectionTag}>KENAPA PILIH KAMI</Text>
-            <View style={styles.sectionTagLine} />
-          </View>
-          <Text style={[styles.sectionTitle, isSmall && { fontSize: 20, lineHeight: 28 }]}>Layanan Premium, Harga Terjangkau</Text>
-          <View style={styles.featuresGrid}>
-            {features.map((f, i) => (
-              <AnimatedCard key={f.title} delay={i * 100} style={[styles.featureCard, { width: isSmall ? '100%' : '48%', padding: isSmall ? 16 : 18 }]}>
-                <View style={[styles.featureIconBg, isSmall && { width: 40, height: 40, borderRadius: 10 }]}>
-                  <Ionicons name={f.icon as any} size={isSmall ? 20 : 22} color="#ef4444" />
+        {/* Main Body Curved Sheet */}
+        <View style={styles.bodySheet}>
+          {/* Menu Layanan (Payment List) */}
+          <Text style={styles.sectionTitle}>Menu Layanan</Text>
+          <View style={styles.paymentGrid}>
+            {paymentList.map((item, index) => (
+              <AnimatedCard
+                key={item.label}
+                delay={index * 60}
+                style={[styles.paymentItem, { width: isSmall ? '24%' : '23%' }]}
+                onPress={() => router.push(item.route as any)}
+              >
+                <View style={styles.paymentIconBox}>
+                  <Ionicons name={item.icon as any} size={26} color={item.color} />
                 </View>
-                <Text style={[styles.featureTitle, isSmall && { fontSize: 13 }]}>{f.title}</Text>
-                <Text style={[styles.featureDesc, isSmall && { fontSize: 11 }]}>{f.desc}</Text>
+                <Text style={styles.paymentLabel} numberOfLines={1}>
+                  {item.label}
+                </Text>
               </AnimatedCard>
             ))}
           </View>
-        </View>
 
-        {/* Testimonials */}
-        <View style={styles.testimonialSection}>
-          <View style={styles.sectionTagRow}>
-            <View style={[styles.sectionTagLine, { backgroundColor: '#334155' }]} />
-            <Text style={[styles.sectionTag, { color: '#dc2626' }]}>TESTIMONI</Text>
-            <View style={[styles.sectionTagLine, { backgroundColor: '#334155' }]} />
+          {/* Promo & Penawaran */}
+          <View style={styles.promoHeaderRow}>
+            <Text style={styles.sectionTitle}>Promo & Penawaran</Text>
+            <TouchableOpacity onPress={() => router.push('/cars')} activeOpacity={0.7}>
+              <Text style={styles.seeMoreText}>Lihat Semua</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={[styles.sectionTitle, { color: '#f1f5f9' }]}>Kata Pelanggan Kami</Text>
-          {testimonialsLoading ? (
-            <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#475569', fontSize: 13 }}>Memuat testimoni...</Text>
-            </View>
-          ) : testimonials.length > 0 ? (
+
+          <View style={styles.promoSliderWrap}>
             <FlatList
-              data={testimonials}
+              ref={promoRef}
+              data={promoCars}
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyExtractor={(_, i) => String(i)}
-              renderItem={({ item }) => <TestimonialCard item={item} />}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
-            />
-          ) : (
-            <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#475569', fontSize: 13 }}>Belum ada testimoni</Text>
-            </View>
-          )}
-        </View>
+              keyExtractor={(item, i) => item.id || String(i)}
+              contentContainerStyle={{ gap: 16, paddingRight: 20 }}
+              snapToInterval={isSmall ? 246 : 276}
+              decelerationRate="fast"
+              getItemLayout={(_, index) => {
+                const cardWidth = isSmall ? 246 : 276;
+                return { length: cardWidth, offset: cardWidth * index, index };
+              }}
+              onScrollToIndexFailed={(info) => {
+                const cardWidth = isSmall ? 246 : 276;
+                promoRef.current?.scrollToOffset({ offset: info.index * cardWidth, animated: true });
+              }}
+              onTouchStart={() => {
+                isPausedRef.current = true;
+              }}
+              onScrollBeginDrag={() => {
+                isPausedRef.current = true;
+              }}
+              onScrollEndDrag={() => {
+                setTimeout(() => {
+                  isPausedRef.current = false;
+                }, 2000);
+              }}
+              onMomentumScrollEnd={(e) => {
+                const offsetX = e.nativeEvent.contentOffset.x;
+                const cardWidth = isSmall ? 246 : 276;
+                const newIndex = Math.round(offsetX / cardWidth);
+                if (newIndex >= 0 && newIndex < promoCars.length) {
+                  promoIndexRef.current = newIndex;
+                }
+                setTimeout(() => {
+                  isPausedRef.current = false;
+                }, 2000);
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  style={[styles.promoSliderCard, { width: isSmall ? 230 : 260 }]}
+                  onPress={() => router.push('/cars')}
+                >
+                  <View style={styles.promoImgBox}>
+                    <Image
+                      source={{ uri: item.image || item.image_url || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=600&q=80' }}
+                      style={styles.promoImg}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.hotPromoBadge}>
+                      <Ionicons name="flame" size={13} color="#fff" />
+                      <Text style={styles.hotPromoText}>HOT PROMO</Text>
+                    </View>
+                  </View>
 
-        {/* CTA */}
-        <View style={[styles.ctaSection, isSmall && { margin: 12, padding: 24 }]}>
-          <Ionicons name="rocket" size={isSmall ? 40 : 48} color="#fcd34d" style={{ marginBottom: 12 }} />
-          <Text style={[styles.ctaTitle, isSmall && { fontSize: 20 }]}>Siap Mulai Perjalanan?</Text>
-          <Text style={[styles.ctaSubtitle, isSmall && { fontSize: 12 }]}>Jelajahi pilihan armada kami atau hubungi kami sekarang juga untuk penawaran terbaik!</Text>
-          <View style={[styles.ctaButtonsRow, { flexDirection: isSmall ? 'column' : 'row', gap: 12, width: '100%' }]}>
-            <TouchableOpacity style={[styles.ctaButtonPrimary, isSmall && { paddingVertical: 13 }]} onPress={() => router.push('/cars')} activeOpacity={0.85}>
-              <Text style={styles.ctaButtonTextPrimary}> Lihat Armada</Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity style={[styles.ctaButtonSecondary, isSmall && { paddingVertical: 13 }]} onPress={openWhatsApp} activeOpacity={0.85}>
-              <Text style={styles.ctaButtonTextSecondary}> Hubungi Langsung</Text>
-            </TouchableOpacity> */}
+                  <View style={styles.promoCardBody}>
+                    <Text style={styles.promoBrandText}>{item.brand || 'Toyota'}</Text>
+                    <Text style={styles.promoCarName} numberOfLines={1}>{item.name || 'Unit Spesial'}</Text>
+
+                    <View style={styles.promoSpecRow}>
+                      <Ionicons name="cog" size={12} color="#94a3b8" />
+                      <Text style={styles.promoSpecText}>{item.transmission || 'Automatic'}</Text>
+                      <Text style={styles.promoSpecDot}>•</Text>
+                      <Ionicons name="people" size={12} color="#94a3b8" />
+                      <Text style={styles.promoSpecText}>{item.passengers || item.seat || 5} Kursi</Text>
+                    </View>
+
+                    <View style={styles.promoPriceRow}>
+                      <View>
+                        <Text style={styles.promoPriceLabel}>Mulai dari</Text>
+                        <Text style={styles.promoPriceValue}>
+                          Rp {Number(item.price || item.price_per_day || 250000).toLocaleString('id-ID')}
+                          <Text style={styles.promoPricePer}> /hari</Text>
+                        </Text>
+                      </View>
+
+                      <View style={styles.promoBookBtn}>
+                        <Text style={styles.promoBookText}>Sewa</Text>
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+
+          {/* Testimoni Pelanggan */}
+          <View style={styles.testimonialContainer}>
+            <Text style={styles.sectionTitle}>Testimoni Pelanggan</Text>
+            {testimonialsLoading ? (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Text style={{ color: '#64748b', fontSize: 12 }}>Memuat testimoni...</Text>
+              </View>
+            ) : testimonials.length > 0 ? (
+              <FlatList
+                data={testimonials}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(_, i) => String(i)}
+                renderItem={({ item }) => <TestimonialCard item={item} />}
+                contentContainerStyle={{ paddingRight: 20 }}
+              />
+            ) : (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Text style={{ color: '#64748b', fontSize: 12 }}>Belum ada testimoni</Text>
+              </View>
+            )}
           </View>
         </View>
-
-        <View style={{ height: 20 }} />
-      </ScrollView>
-
+      </Animated.ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0f1e' },
-  hero: { minHeight: 600 },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5,8,20,0.82)',
+  container: {
+    flex: 1,
+    backgroundColor: '#0a0f1e',
+    fontFamily: 'Arial',
   },
-  heroContent: { padding: 20, paddingBottom: 32 },
-  badge: {
+  stickyBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#881337',
+    zIndex: 999,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  stickyBarBg: {
+    width: '100%',
+  },
+  stickyBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  stickyBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(220,38,38,0.15)',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  stickyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stickyMiniLogo: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.35)',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    marginBottom: 20,
+    borderColor: 'rgba(255,255,255,0.4)',
+  },
+  stickyBarTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+  },
+  avatarWrapSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.4)',
+    overflow: 'hidden',
+    backgroundColor: '#9f1239',
+  },
+  bellBtnSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topHeaderWrap: {
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
+    backgroundColor: '#881337',
+  },
+  topHeaderBg: {
+    width: '100%',
+  },
+  topHeaderBgImg: {
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+  },
+  topHeaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.82)',
+  },
+  topHeaderContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 75,
+  },
+  topNavRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 8,
   },
-  badgeDot: { color: '#ef4444', fontSize: 8 },
-  badgeText: { color: '#fca5a5', fontSize: 12, fontWeight: '700', letterSpacing: 0.3 },
-  heroTitle: { fontSize: 36, fontWeight: '900', color: '#fff', lineHeight: 44, marginBottom: 14 },
-  heroTitleRed: { color: '#ef4444' },
-  heroTitleAccent: { color: '#ef4444' },
-  heroSubtitle: { fontSize: 15, color: '#94a3b8', lineHeight: 24, marginBottom: 28 },
-  heroButtons: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-  ctaButtons: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-  btnPrimary: {
-    flex: 1, backgroundColor: '#dc2626', paddingVertical: 15, borderRadius: 16,
+  avatarWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    overflow: 'hidden',
+    backgroundColor: '#9f1239',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarFallback: {
+    flex: 1,
     alignItems: 'center',
-    shadowColor: '#dc2626', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 12, elevation: 8,
+    justifyContent: 'center',
   },
-  btnPrimaryText: { color: '#fff', fontWeight: '800', fontSize: 14, letterSpacing: 0.3 },
-  btnSecondary: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', paddingVertical: 15, borderRadius: 16,
-    alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)',
+  bellBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  btnSecondaryText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  statsRow: { flexDirection: 'row', gap: 10 },
-  statCard: {
-    flex: 1, backgroundColor: 'rgba(30,41,59,0.7)', borderRadius: 16,
-    padding: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
+  balanceCenterWrap: {
+    alignItems: 'center',
+    marginTop: 22,
+    marginBottom: 8,
   },
-  statValue: { fontSize: 20, fontWeight: '900', color: '#fff' },
-  statLabel: { fontSize: 10, color: '#94a3b8', marginTop: 3, fontWeight: '600' },
+  balanceLabel: {
+    color: '#fecdd3',
+    fontSize: 13,
+    fontFamily: 'Arial',
+    fontWeight: '600',
+    marginBottom: 4,
+    letterSpacing: 0.3,
+  },
+  balanceValue: {
+    color: '#ffffff',
+    fontSize: 42,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
 
-  // Promo Marketing Card
-  promoContainer: { paddingHorizontal: 24, paddingTop: 20, backgroundColor: '#0f172a' },
-  promoCard: {
-    backgroundColor: '#1e293b', borderRadius: 18, padding: 20,
-    borderWidth: 1, borderColor: '#334155',
+  // Floating Action Pill
+  floatingActionContainer: {
+    marginTop: -50,
+    marginHorizontal: 20,
+    zIndex: 20,
   },
-  promoContent: { position: 'relative' },
-  promoBadgeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  promoBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(245, 158, 11, 0.18)', paddingHorizontal: 12, paddingVertical: 5,
-    borderRadius: 20, borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.4)',
+  floatingActionCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 24,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  promoBadgeText: { fontSize: 11, fontWeight: '800', color: '#fbbf24', letterSpacing: 0.5 },
-  promoTimer: { fontSize: 11, fontWeight: '700', color: '#94a3b8' },
-  promoTitle: { fontSize: 20, fontWeight: '900', color: '#fff', marginBottom: 6, lineHeight: 28 },
-  promoSubtitle: { fontSize: 13, color: '#cbd5e1', lineHeight: 20, marginBottom: 18 },
-  promoCtaBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#dc2626', paddingVertical: 14, borderRadius: 16,
-    shadowColor: '#dc2626', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6,
+  quickActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
-  promoCtaText: { fontSize: 14, fontWeight: '800', color: '#fff' },
+  quickActionItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  quickActionIconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  quickActionText: {
+    color: '#f8fafc',
+    fontSize: 12,
+    fontFamily: 'Arial',
+    fontWeight: '700',
+  },
 
-  // Section
-  section: { padding: 24, backgroundColor: '#0f172a' },
-  sectionTagRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
-  sectionTagLine: { flex: 1, height: 1, backgroundColor: '#334155' },
-  sectionTag: { fontSize: 10, fontWeight: '800', color: '#ef4444', letterSpacing: 2 },
-  sectionTitle: { fontSize: 24, fontWeight: '900', color: '#f8fafc', marginBottom: 20, lineHeight: 32, textAlign: 'center' },
-  featuresGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 14 },
-  featureCard: {
-    width: '48%', backgroundColor: '#1e293b', borderRadius: 18, padding: 18,
-    borderWidth: 1, borderColor: '#334155',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 3,
+  // Body Sheet
+  bodySheet: {
+    marginTop: 18,
+    paddingHorizontal: 20,
   },
-  featureIconBg: {
-    width: 44, height: 44, borderRadius: 12,
-    backgroundColor: 'rgba(239,68,68,0.15)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 12,
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '800',
+    color: '#f8fafc',
+    marginBottom: 16,
   },
-  featureEmoji: { fontSize: 22 },
-  featureTitle: { fontSize: 14, fontWeight: '800', color: '#f1f5f9', marginBottom: 6 },
-  featureDesc: { fontSize: 12, color: '#94a3b8', lineHeight: 18 },
-
-  // Testimonials
-  testimonialSection: { backgroundColor: '#0a0f1e', paddingTop: 24, paddingBottom: 24 },
-
-  // CTA
-  ctaSection: {
-    margin: 20, backgroundColor: '#1e293b', borderRadius: 28, padding: 32,
-    alignItems: 'center', borderWidth: 1, borderColor: '#334155',
-    shadowColor: '#dc2626', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 8,
-  },
-  ctaEmoji: { fontSize: 40, marginBottom: 12 },
-  ctaTitle: { fontSize: 24, fontWeight: '900', color: '#f1f5f9', textAlign: 'center', marginBottom: 8 },
-  ctaSubtitle: { fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 24, lineHeight: 20 },
-  ctaButtonsRow: { width: '100%' },
-  ctaButtonPrimary: {
-    flex: 1, backgroundColor: '#dc2626', paddingVertical: 15, borderRadius: 16,
-    alignItems: 'center', shadowColor: '#dc2626', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
-  },
-  ctaButtonTextPrimary: { color: '#fff', fontWeight: '800', fontSize: 14 },
-  ctaButtonSecondary: {
-    flex: 1, backgroundColor: '#16a34a', paddingVertical: 15, borderRadius: 16,
-    alignItems: 'center', shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
-  },
-  ctaButtonTextSecondary: { color: '#fff', fontWeight: '800', fontSize: 14 },
-
-  // Grid Menu
-  menuSection: {
-    paddingTop: 24,
-    paddingBottom: 8,
-    backgroundColor: '#0a0f1e',
-  },
-  menuGrid: {
+  paymentGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 16,
+    rowGap: 18,
+    marginBottom: 28,
   },
-  menuItem: {
+  paymentItem: {
     alignItems: 'center',
-    marginBottom: 4,
   },
-  menuIconBg: {
+  paymentIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
     backgroundColor: '#1e293b',
     alignItems: 'center',
     justifyContent: 'center',
@@ -362,15 +648,201 @@ const styles = StyleSheet.create({
     borderColor: '#334155',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  menuEmoji: {},
-  menuText: {
-    color: '#f8fafc',
+  paymentLabel: {
+    color: '#cbd5e1',
+    fontSize: 11,
+    fontFamily: 'Arial',
     fontWeight: '700',
     textAlign: 'center',
-    letterSpacing: 0.2,
+  },
+
+  // Promo
+  promoHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  seeMoreText: {
+    color: '#ef4444',
+    fontSize: 13,
+    fontFamily: 'Arial',
+    fontWeight: '700',
+  },
+  promoWrap: {
+    position: 'relative',
+    marginBottom: 36,
+    alignItems: 'center',
+  },
+  promoBannerCard: {
+    width: '100%',
+    backgroundColor: '#1e293b',
+    borderRadius: 24,
+    padding: 24,
+    paddingBottom: 36,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    overflow: 'hidden',
+  },
+  promoBannerContent: {},
+  promoBannerTitle: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+  promoBannerSub: {
+    color: '#94a3b8',
+    fontSize: 13,
+    fontFamily: 'Arial',
+    lineHeight: 20,
+    maxWidth: '85%',
+  },
+  floatingCenterCircle: {
+    position: 'absolute',
+    bottom: -22,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#dc2626',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: '#0a0f1e',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+
+  // Promo Slider ala Permintaan User
+  promoSliderWrap: {
+    marginBottom: 28,
+  },
+  promoSliderCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  promoImgBox: {
+    height: 125,
+    width: '100%',
+    position: 'relative',
+    backgroundColor: '#334155',
+  },
+  promoImg: {
+    width: '100%',
+    height: '100%',
+  },
+  hotPromoBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#dc2626',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  hotPromoText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'Arial',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  promoCardBody: {
+    padding: 14,
+  },
+  promoBrandText: {
+    color: '#ef4444',
+    fontSize: 11,
+    fontFamily: 'Arial',
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  promoCarName: {
+    color: '#f8fafc',
+    fontSize: 15,
+    fontFamily: 'Arial',
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  promoSpecRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 12,
+  },
+  promoSpecText: {
+    color: '#94a3b8',
+    fontSize: 11,
+    fontFamily: 'Arial',
+  },
+  promoSpecDot: {
+    color: '#64748b',
+    fontSize: 11,
+  },
+  promoPriceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingTop: 10,
+  },
+  promoPriceLabel: {
+    color: '#94a3b8',
+    fontSize: 10,
+    fontFamily: 'Arial',
+  },
+  promoPriceValue: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  promoPricePer: {
+    color: '#ef4444',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  promoBookBtn: {
+    backgroundColor: '#dc2626',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  promoBookText: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: 'Arial',
+    fontWeight: '800',
+  },
+
+  // Testimonial
+  testimonialContainer: {
+    marginTop: 10,
   },
 });
