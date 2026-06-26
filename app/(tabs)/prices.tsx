@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   RefreshControl,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -55,6 +56,7 @@ export default function PricesScreen() {
   const { width: SCREEN_W } = useWindowDimensions();
   const isSmall = SCREEN_W < 375;
   const [prices, setPrices] = useState<PriceCategory[]>([]);
+  const [selectedCat, setSelectedCat] = useState<string>('Semua');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -105,26 +107,51 @@ export default function PricesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+
+      {/* Fixed Hero Red Burgundy Glass Header */}
+      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+        <View style={styles.headerOverlay} />
+
+        {/* <View style={[styles.topHeaderRow, isSmall && { paddingHorizontal: 16, paddingTop: 12 }]}>
+
+          <View style={styles.notifBtnGlass}>
+            <Ionicons name="pricetag" size={18} color="#ffffff" />
+            <View style={styles.goldDot} />
+          </View>
+        </View> */}
+
+        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 16 }]}>
+          <Text style={styles.heroBigTitle}>Tarif Sewa Eksekutif</Text>
+          <Text style={styles.heroSubText}>Transparan, penawaran terbaik untuk sewa lepas kunci & pengemudi VIP</Text>
+        </View>
+      </ImageBackground>
+
+      {/* Fixed Category Filter Pills */}
+      <View style={{ flexGrow: 0, flexShrink: 0, marginTop: 14, marginBottom: 6 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
+          {['Semua', ...prices.map(p => p.category)].map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.filterPill, selectedCat === cat && styles.filterPillActive]}
+              onPress={() => setSelectedCat(cat)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.filterPillText, selectedCat === cat && styles.filterPillTextActive]}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#dc2626" colors={['#dc2626']} />}
+        contentContainerStyle={{ paddingBottom: 110, paddingTop: 4 }}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, isSmall && { fontSize: 20 }]}>Daftar Harga</Text>
-            <Text style={[styles.subtitle, isSmall && { fontSize: 11, maxWidth: 180 }]}>Harga sewa per unit, belum termasuk BBM & driver</Text>
-          </View>
-          <View style={styles.headerBadge}>
-            <Ionicons name="pricetag" size={22} color="#f1f5f9" />
-          </View>
-        </View>
-
         {/* Info Banner */}
         <View style={[styles.infoBanner, isSmall && { marginHorizontal: 12, padding: 12 }]}>
           <Ionicons name="information-circle" size={20} color="#fbbf24" style={{ marginTop: -2 }} />
           <Text style={[styles.infoText, isSmall && { fontSize: 11 }]}>
-            Harga dapat berubah sewaktu-waktu. Hubungi kami untuk penawaran terbaik!
+            Harga dapat berubah pada musim liburan. Hubungi WhatsApp VIP kami untuk penawaran terbaik!
           </Text>
         </View>
 
@@ -135,37 +162,51 @@ export default function PricesScreen() {
           </View>
         ) : (
           <>
-            {/* Price Categories */}
-            {prices.map((cat) => (
-              <View key={cat.category} style={[styles.categoryCard, isSmall && { margin: 12, marginBottom: 0 }]}>
-                <View style={[styles.categoryHeader, { borderLeftColor: cat.color }, isSmall && { padding: 12, gap: 8 }]}>
-                  <Ionicons name={getCategoryIcon(cat.emoji) as any} size={isSmall ? 20 : 24} color={cat.color} />
-                  <Text style={[styles.categoryTitle, isSmall && { fontSize: 13 }]}>{cat.category}</Text>
-                  <View style={[styles.categoryBadge, { backgroundColor: cat.color + '20', borderColor: cat.color + '40' }, isSmall && { paddingHorizontal: 8, paddingVertical: 3 }]}>
-                    <Text style={[styles.categoryBadgeText, { color: cat.color }, isSmall && { fontSize: 10 }]}>{cat.items.length} unit</Text>
+            {/* VIP Catalogue Book Chapters */}
+            {prices.filter(cat => selectedCat === 'Semua' || cat.category === selectedCat).map((cat, catIdx) => (
+              <View key={cat.category} style={[styles.bookChapterCard, isSmall && { margin: 12, marginBottom: 0 }]}>
+                {/* Book Chapter Title Banner */}
+                <View style={[styles.bookChapterHeader, { borderLeftColor: cat.color }, isSmall && { padding: 12 }]}>
+                  <Ionicons name={getCategoryIcon(cat.emoji) as any} size={22} color={cat.color} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.chapterSubText}>EDISI KATALOG • BAB {catIdx + 1}</Text>
+                    <Text style={[styles.chapterBigTitle, isSmall && { fontSize: 15 }]}>{cat.category}</Text>
+                  </View>
+                  <View style={[styles.chapterBadge, { backgroundColor: cat.color + '20', borderColor: cat.color + '50' }]}>
+                    <Text style={[styles.chapterBadgeText, { color: cat.color }]}>{cat.items.length} Unit</Text>
                   </View>
                 </View>
 
-                <View style={[styles.tableHeader, isSmall && { paddingHorizontal: 10, paddingVertical: 8 }]}>
-                  <Text style={[styles.tableCell, { flex: 2 }, isSmall && { fontSize: 10 }]}>Unit</Text>
-                  <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }, isSmall && { fontSize: 10 }]}>Durasi</Text>
-                  <Text style={[styles.tableCell, { flex: 1.5, textAlign: 'right' }, isSmall && { fontSize: 10 }]}>Harga</Text>
-                </View>
+                {/* Book Pages List */}
+                <View style={styles.bookPagesContainer}>
+                  {cat.items.map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={[styles.bookPageRow, i < cat.items.length - 1 && styles.bookPageDivider, isSmall && { padding: 12 }]}
+                      activeOpacity={0.75}
+                      onPress={() => router.push({ pathname: '/car-detail', params: { id: item.car_id || '', name: item.name } })}
+                    >
+                      <View style={[styles.bookCarIconRing, { borderColor: cat.color + '40' }]}>
+                        <Ionicons name="car-sport" size={18} color="#cbd5e1" />
+                      </View>
 
-                {cat.items.map((item, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    style={[styles.tableRow, i % 2 === 1 && styles.tableRowAlt, isSmall && { paddingHorizontal: 10, paddingVertical: 10 }]}
-                    activeOpacity={0.7}
-                    onPress={() => router.push({ pathname: '/car-detail', params: { id: item.car_id || '', name: item.name } })}
-                  >
-                    <Text style={[styles.rowName, { flex: 2 }, isSmall && { fontSize: 11 }]} numberOfLines={2}>{item.name}</Text>
-                    <View style={[styles.durationBadge, { flex: 1, alignSelf: 'center' }, isSmall && { paddingHorizontal: 6, paddingVertical: 3 }]}>
-                      <Text style={[styles.durationText, isSmall && { fontSize: 10 }]}>{item.duration}</Text>
-                    </View>
-                    <Text style={[styles.priceText, { flex: 1.5 }, isSmall && { fontSize: 11 }]}>{formatPrice(item.price)}</Text>
-                  </TouchableOpacity>
-                ))}
+                      <View style={styles.bookPageInfo}>
+                        <Text style={[styles.bookCarName, isSmall && { fontSize: 13 }]} numberOfLines={1}>{item.name}</Text>
+                        <View style={styles.bookDurationTag}>
+                          <Ionicons name="time" size={11} color="#fbbf24" style={{ marginRight: 3 }} />
+                          <Text style={styles.bookDurationText}>{item.duration}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.bookPagePriceWrap}>
+                        <Text style={styles.bookPriceText}>{formatPrice(item.price)}</Text>
+                        <Text style={styles.bookPriceSub}>/ sewa VIP</Text>
+                      </View>
+
+                      <Ionicons name="chevron-forward" size={16} color="#64748b" style={{ marginLeft: 6 }} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             ))}
 
@@ -266,9 +307,174 @@ const styles = StyleSheet.create({
   waButton: {
     backgroundColor: '#16a34a', marginHorizontal: 16, borderRadius: 16,
     paddingVertical: 17, alignItems: 'center',
-    shadowColor: '#16a34a', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
+    shadowColor: '#22c55e', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.6, shadowRadius: 14, elevation: 8,
   },
   waButtonText: { color: '#fff', fontWeight: '800', fontSize: 15, letterSpacing: 0.3 },
   center: { alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: '#475569', marginTop: 12, fontSize: 14 },
+
+  // Redesign Styles
+  headerBg: {
+    width: '100%',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    elevation: 12,
+    shadowColor: '#881337',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+  },
+  headerBgImg: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(88, 19, 55, 0.92)',
+  },
+  topHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+    paddingTop: 16,
+  },
+  locSubtitle: {
+    fontSize: 11,
+    color: '#fecdd3',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  locTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 3,
+  },
+  locTitleText: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+  },
+  notifBtnGlass: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  goldDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fbbf24',
+  },
+  headerHeroTextWrap: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 22,
+  },
+  heroBigTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+  },
+  heroSubText: {
+    fontSize: 13,
+    color: '#fecdd3',
+    marginTop: 4,
+    fontFamily: 'Arial',
+  },
+  filterPill: {
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 20,
+    backgroundColor: '#1e293b',
+    borderWidth: 1.2,
+    borderColor: '#334155',
+  },
+  filterPillActive: {
+    backgroundColor: '#dc2626',
+    borderColor: '#ff4d4d',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  filterPillText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#cbd5e1',
+  },
+  filterPillTextActive: {
+    color: '#ffffff',
+  },
+
+  // Catalogue Book UI Styles
+  bookChapterCard: {
+    backgroundColor: '#1e293b', margin: 16, marginBottom: 0,
+    borderRadius: 22, overflow: 'hidden', borderWidth: 1, borderColor: '#334155',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 6,
+  },
+  bookChapterHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#0f172a', padding: 16, borderLeftWidth: 5,
+    borderBottomWidth: 1, borderBottomColor: '#334155',
+  },
+  chapterSubText: {
+    fontSize: 10, fontWeight: '700', color: '#94a3b8', letterSpacing: 1, textTransform: 'uppercase',
+  },
+  chapterBigTitle: {
+    fontSize: 17, fontWeight: '900', color: '#f1f5f9', marginTop: 2, fontFamily: 'Arial',
+  },
+  chapterBadge: {
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, borderWidth: 1,
+  },
+  chapterBadgeText: { fontSize: 11, fontWeight: '800' },
+  bookPagesContainer: {
+    backgroundColor: '#1e293b',
+  },
+  bookPageRow: {
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14,
+  },
+  bookPageDivider: {
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  bookCarIconRing: {
+    width: 38, height: 38, borderRadius: 19, backgroundColor: '#0f172a',
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginRight: 12,
+  },
+  bookPageInfo: {
+    flex: 1,
+  },
+  bookCarName: {
+    fontSize: 14, fontWeight: '800', color: '#f8fafc', fontFamily: 'Arial',
+  },
+  bookDurationTag: {
+    flexDirection: 'row', alignItems: 'center', marginTop: 4,
+    backgroundColor: 'rgba(245,158,11,0.12)', paddingHorizontal: 7, paddingVertical: 2.5,
+    borderRadius: 6, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)',
+  },
+  bookDurationText: {
+    fontSize: 10, fontWeight: '700', color: '#fbbf24',
+  },
+  bookPagePriceWrap: {
+    alignItems: 'flex-end', justifyContent: 'center',
+  },
+  bookPriceText: {
+    fontSize: 13, fontWeight: '900', color: '#ef4444', fontFamily: 'Arial',
+  },
+  bookPriceSub: {
+    fontSize: 9, fontWeight: '600', color: '#64748b', marginTop: 1,
+  },
 });

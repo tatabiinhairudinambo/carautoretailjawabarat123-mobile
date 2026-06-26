@@ -73,47 +73,43 @@ export default function WilayahScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" colors={['#ffffff']} />}
-      >
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View style={styles.headerTitleWrap}>
-              {/* <View style={styles.headerBadge}>
-                <Text style={styles.headerBadgeDot}>●</Text>
-                <Text style={styles.headerBadgeText}>JARINGAN RESMI JAWA BARAT</Text>
-              </View> */}
-              <Text style={[styles.title, isSmall && { fontSize: 22 }]}>Wilayah Layanan</Text>
-            </View>
-            {/* <View style={styles.headerIconWrap}>
-              <Ionicons name="map" size={24} color="#ef4444" />
-            </View> */}
+
+      {/* Fixed Hero Red Burgundy Glass Header */}
+      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+        <View style={styles.headerOverlay} />
+
+        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
+          <Text style={styles.locSubtitle}>JARINGAN SHOWROOM VIP</Text>
+          <Text style={styles.heroBigTitle}>Wilayah Layanan Resmi</Text>
+          <Text style={styles.heroSubText}>Jangkauan ekspres 24 jam di seluruh kota & kabupaten Jawa Barat</Text>
+        </View>
+      </ImageBackground>
+
+      {/* Fixed Trust Info Bar */}
+      <View style={{ paddingHorizontal: 16, marginTop: 14, marginBottom: 6 }}>
+        <View style={styles.trustBar}>
+          <View style={styles.trustItem}>
+            <Ionicons name="checkmark-circle" size={15} color="#10b981" />
+            <Text style={styles.trustText}>Ready 24 Jam</Text>
           </View>
-
-          <Text style={[styles.subtitle, isSmall && { fontSize: 12 }]}>
-            Pilih area tujuan perjalanan Anda untuk cek ketersediaan armada & booking langsung via WhatsApp.
-          </Text>
-
-          {/* Trust Info Bar */}
-          <View style={styles.trustBar}>
-            <View style={styles.trustItem}>
-              <Ionicons name="checkmark-circle" size={15} color="#10b981" />
-              <Text style={styles.trustText}>Ready 24 Jam</Text>
-            </View>
-            <View style={styles.trustDot} />
-            <View style={styles.trustItem}>
-              <Ionicons name="shield-checkmark" size={15} color="#3b82f6" />
-              <Text style={styles.trustText}>Asuransi All-Risk</Text>
-            </View>
-            <View style={styles.trustDot} />
-            <View style={styles.trustItem}>
-              <Ionicons name="flash" size={15} color="#f59e0b" />
-              <Text style={styles.trustText}>Fast Booking</Text>
-            </View>
+          <View style={styles.trustDot} />
+          <View style={styles.trustItem}>
+            <Ionicons name="shield-checkmark" size={15} color="#3b82f6" />
+            <Text style={styles.trustText}>Asuransi All-Risk</Text>
+          </View>
+          <View style={styles.trustDot} />
+          <View style={styles.trustItem}>
+            <Ionicons name="flash" size={15} color="#f59e0b" />
+            <Text style={styles.trustText}>Fast Booking</Text>
           </View>
         </View>
+      </View>
 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
+        contentContainerStyle={{ paddingBottom: 110, paddingTop: 6 }}
+      >
         <View style={[styles.grid, isSmall && { padding: 12 }]}>
           {regions.map((r, idx) => (
             <AnimatedCard
@@ -152,26 +148,58 @@ export default function WilayahScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  header: {
-    paddingHorizontal: 20, paddingTop: 20, paddingBottom: 18,
-    borderBottomWidth: 1, borderBottomColor: '#1e293b',
+  headerBg: {
+    width: '100%',
+    paddingTop: 24,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#ff1a3c',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-  headerTitleWrap: { flex: 1 },
-  headerBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)', alignSelf: 'flex-start',
-    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
-    borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.35)', marginBottom: 8,
+  headerBgImg: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
   },
-  headerBadgeDot: { color: '#ef4444', fontSize: 8 },
-  headerBadgeText: { fontSize: 9, fontWeight: '800', color: '#fca5a5', letterSpacing: 0.5 },
-  headerIconWrap: {
-    width: 44, height: 44, borderRadius: 14, backgroundColor: '#1e293b',
-    borderWidth: 1, borderColor: '#334155', alignItems: 'center', justifyContent: 'center',
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(88, 19, 55, 0.92)',
   },
-  title: { fontSize: 26, fontWeight: '900', color: '#ffffff', letterSpacing: 0.3, textAlign: 'center' },
-  subtitle: { fontSize: 13, color: '#ffffff', marginTop: 4, lineHeight: 20, marginBottom: 16, textAlign: 'center' },
+  headerHeroTextWrap: {
+    paddingHorizontal: 20,
+    paddingBottom: 4,
+    alignItems: 'center',
+  },
+  locSubtitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#fca5a5',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  heroBigTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: 0.5,
+    fontFamily: 'Arial',
+    textAlign: 'center',
+  },
+  heroSubText: {
+    fontSize: 12,
+    color: '#f8fafc',
+    marginTop: 4,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 10,
+  },
   trustBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
     backgroundColor: '#1e293b', paddingVertical: 10, paddingHorizontal: 12,

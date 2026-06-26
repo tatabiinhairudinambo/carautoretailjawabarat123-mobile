@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, Platform, useWindowDimensions, ImageBackground 
 import { Ionicons } from '@expo/vector-icons';
 
 function TabIcon({ focused, icon, label }: { focused: boolean; icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  const { width: SCREEN_W } = useWindowDimensions();
+  const isSmall = SCREEN_W < 375;
   return (
     <View style={styles.tabContainer}>
       <View style={styles.iconSlot}>
-        <Ionicons name={icon} size={24} color={focused ? '#ff334b' : '#cbd5e1'} style={[focused && styles.emojiActive, focused && styles.iconGlowActive]} />
+        <Ionicons name={icon} size={isSmall ? 20 : 22} color={focused ? '#ff334b' : '#cbd5e1'} style={[focused && styles.emojiActive, focused && styles.iconGlowActive]} />
       </View>
-      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>{label}</Text>
+      <Text style={[styles.label, isSmall ? { fontSize: 9.5 } : { fontSize: 10.5 }, focused && styles.labelActive]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{label}</Text>
     </View>
   );
 }
@@ -51,7 +53,7 @@ export default function TabLayout() {
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="car-outline" label="Armada" />
+            <TabIcon focused={focused} icon={focused ? "car-sport" : "car-sport-outline"} label="Armada" />
           ),
         }}
       />
@@ -60,7 +62,7 @@ export default function TabLayout() {
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="pricetag-outline" label="Harga" />
+            <TabIcon focused={focused} icon={focused ? "pricetag" : "pricetag-outline"} label="Tarif" />
           ),
         }}
       />
@@ -76,7 +78,7 @@ export default function TabLayout() {
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="location-outline" label="Lokasi" />
+            <TabIcon focused={focused} icon={focused ? "location" : "location-outline"} label="Lokasi" />
           ),
         }}
       />
@@ -85,7 +87,7 @@ export default function TabLayout() {
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="person-outline" label="Akun" />
+            <TabIcon focused={focused} icon={focused ? "person" : "person-outline"} label="Profil" />
           ),
         }}
       />
