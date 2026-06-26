@@ -6,7 +6,7 @@ function TabIcon({ focused, icon, label }: { focused: boolean; icon: keyof typeo
   return (
     <View style={styles.tabContainer}>
       <View style={styles.iconSlot}>
-        <Ionicons name={icon} size={24} color={focused ? '#ffffff' : '#cbd5e1'} style={focused && styles.emojiActive} />
+        <Ionicons name={icon} size={24} color={focused ? '#ff334b' : '#cbd5e1'} style={[focused && styles.emojiActive, focused && styles.iconGlowActive]} />
       </View>
       <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>{label}</Text>
     </View>
@@ -21,10 +21,10 @@ function HomeTabIcon({ focused }: { focused: boolean }) {
     <View style={styles.tabContainer}>
       <View style={styles.iconSlot}>
         <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, bottom: -4 }]}>
-          <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 28} color="#fff" />
+          <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 28} color="#fff" style={focused ? styles.iconGlowActive : undefined} />
         </View>
       </View>
-      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>Beranda</Text>
+      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>Home</Text>
     </View>
   );
 }
@@ -38,9 +38,11 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         tabBarBackground: () => (
-          <ImageBackground source={require('../../assets/logo.jpg')} style={StyleSheet.absoluteFill}>
-            <View style={styles.tabBarOverlay} />
-          </ImageBackground>
+          <View style={StyleSheet.absoluteFill}>
+            <ImageBackground source={require('../../assets/logo.jpg')} style={StyleSheet.absoluteFill} resizeMode="cover">
+              <View style={styles.tabBarOverlay} />
+            </ImageBackground>
+          </View>
         ),
       }}
     >
@@ -105,14 +107,14 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#881337',
+    backgroundColor: 'transparent',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.2)',
     height: Platform.OS === 'ios' ? 88 : 68,
     paddingHorizontal: 8,
     paddingTop: 8,
     paddingBottom: Platform.OS === 'ios' ? 22 : 8,
-    elevation: 20,
+    elevation: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.3,
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
   },
   tabBarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(110, 15, 42, 0.92)',
+    backgroundColor: 'rgba(10, 15, 30, 0.94)',
   },
   tabContainer: {
     alignItems: 'center',
@@ -138,6 +140,11 @@ const styles = StyleSheet.create({
   emojiActive: {
     transform: [{ scale: 1.15 }],
   },
+  iconGlowActive: {
+    textShadowColor: '#ff1a3c',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
   label: {
     fontSize: 12,
     fontFamily: 'Arial',
@@ -148,7 +155,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   labelActive: {
-    color: '#ffffff',
+    color: '#ff334b',
     fontFamily: 'Arial',
     fontWeight: 'bold',
     textShadowColor: 'rgba(0,0,0,0.95)',
@@ -161,7 +168,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#dc2626',
     borderWidth: 3.5,
-    borderColor: '#881337',
+    borderColor: '#0f172a',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -171,7 +178,12 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   homeInnerActive: {
-    backgroundColor: '#b91c1c',
+    backgroundColor: '#ff1a1a',
+    shadowColor: '#ff3333',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 20,
   },
 });
 
