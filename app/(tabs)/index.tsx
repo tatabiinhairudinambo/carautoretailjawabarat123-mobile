@@ -83,10 +83,10 @@ export default function HomeScreen() {
           <View style={styles.heroOverlay} />
           <SafeAreaView edges={['top']} style={styles.heroContent}>
             {/* Badge */}
-            <View style={styles.badge}>
+            {/* <View style={styles.badge}>
               <Text style={styles.badgeDot}>●</Text>
               <Text style={styles.badgeText}>Rental Mobil Terpercaya</Text>
-            </View>
+            </View> */}
 
             <Text style={[styles.heroTitle, { fontSize: isSmall ? 28 : 36, lineHeight: isSmall ? 36 : 44 }]}>
               Sewa Mobil Aman & Terpercaya di <Text style={styles.heroTitleAccent}>Jawa Barat</Text>
