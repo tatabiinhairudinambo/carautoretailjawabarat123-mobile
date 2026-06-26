@@ -1,12 +1,14 @@
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Platform, useWindowDimensions, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 function TabIcon({ focused, icon, label }: { focused: boolean; icon: keyof typeof Ionicons.glyphMap; label: string }) {
   return (
     <View style={styles.tabContainer}>
-      <Ionicons name={icon} size={22} color={focused ? '#ef4444' : 'rgba(255,255,255,0.5)'} style={focused && styles.emojiActive} />
-      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1} adjustsFontSizeToFit>{label}</Text>
+      <View style={styles.iconSlot}>
+        <Ionicons name={icon} size={24} color={focused ? '#ffffff' : '#cbd5e1'} style={focused && styles.emojiActive} />
+      </View>
+      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>{label}</Text>
     </View>
   );
 }
@@ -14,12 +16,15 @@ function TabIcon({ focused, icon, label }: { focused: boolean; icon: keyof typeo
 function HomeTabIcon({ focused }: { focused: boolean }) {
   const { width: SCREEN_W } = useWindowDimensions();
   const isSmall = SCREEN_W < 375;
+  const circleSize = isSmall ? 52 : 58;
   return (
-    <View style={styles.homeButton}>
-      <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: isSmall ? 56 : 64, height: isSmall ? 56 : 64, borderRadius: isSmall ? 28 : 32 }]}>
-        <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 30} color="#fff" />
+    <View style={styles.tabContainer}>
+      <View style={styles.iconSlot}>
+        <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, bottom: -4 }]}>
+          <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 28} color="#fff" />
+        </View>
       </View>
-      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1} adjustsFontSizeToFit>Beranda</Text>
+      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>Beranda</Text>
     </View>
   );
 }
@@ -32,6 +37,11 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
+        tabBarBackground: () => (
+          <ImageBackground source={require('../../assets/logo.jpg')} style={StyleSheet.absoluteFill}>
+            <View style={styles.tabBarOverlay} />
+          </ImageBackground>
+        ),
       }}
     >
       <Tabs.Screen
@@ -64,7 +74,7 @@ export default function TabLayout() {
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="location-outline" label="Wilayah" />
+            <TabIcon focused={focused} icon="location-outline" label="Lokasi" />
           ),
         }}
       />
@@ -95,62 +105,73 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#0a0f1e',
+    backgroundColor: '#881337',
     borderTopWidth: 1,
-    borderTopColor: '#1e293b',
-    height: Platform.OS === 'ios' ? 85 : 65,
+    borderTopColor: 'rgba(255,255,255,0.2)',
+    height: Platform.OS === 'ios' ? 88 : 68,
     paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 22 : 8,
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
+  },
+  tabBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(110, 15, 42, 0.92)',
   },
   tabContainer: {
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    width: '100%',
+    height: 50,
+  },
+  iconSlot: {
+    height: 28,
+    width: 28,
+    alignItems: 'center',
     justifyContent: 'center',
-    height: '100%',
-    paddingTop: Platform.OS === 'ios' ? 12 : 0,
-    gap: 4,
+    marginBottom: 4,
   },
   emojiActive: {
     transform: [{ scale: 1.15 }],
   },
   label: {
-    fontSize: 10,
-    color: '#94a3b8',
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: 'Arial',
+    color: '#cbd5e1',
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   labelActive: {
-    color: '#ef4444',
-    fontWeight: '800',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.95)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 
-  // Home center button
-  homeButton: {
-    alignItems: 'center',
-    marginTop: -22,
-    justifyContent: 'center',
-    gap: 4,
-  },
+  // Home center button circle
   homeInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    position: 'absolute',
     backgroundColor: '#dc2626',
-    borderWidth: 4,
-    borderColor: '#0a0f1e',
+    borderWidth: 3.5,
+    borderColor: '#881337',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#dc2626',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 14,
-    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
   homeInnerActive: {
     backgroundColor: '#b91c1c',
-    shadowOpacity: 0.8,
   },
 });
 
