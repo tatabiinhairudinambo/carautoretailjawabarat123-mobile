@@ -8,6 +8,7 @@ import {
   Linking,
   useWindowDimensions,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const BRAND_FALLBACK_IMAGES: Record<string, string> = {
@@ -38,23 +39,28 @@ interface CarCardProps {
 const WHATSAPP_NUMBER = '6281234567890';
 
 export default function CarCard({ car }: CarCardProps) {
+  const router = useRouter();
   const { width: SCREEN_W } = useWindowDimensions();
   const isSmall = SCREEN_W < 375;
   const [imgError, setImgError] = React.useState(false);
-  const imageUri = imgError
-    ? (BRAND_FALLBACK_IMAGES[car.brand] || BRAND_FALLBACK_IMAGES['Toyota'])
+  const imageUri = (!car?.image || car.image === '' || imgError)
+    ? (BRAND_FALLBACK_IMAGES[car?.brand] || BRAND_FALLBACK_IMAGES['Toyota'])
     : car.image;
 
   const handleWhatsApp = () => {
-    const msg = `Halo, saya tertarik dengan ${car.name} (${car.year}). Apakah tersedia untuk disewa?`;
+    const msg = `Halo, saya tertarik dengan ${car?.name || 'Mobil'} (${car?.year || ''}). Apakah tersedia untuk disewa?`;
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
   };
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat('id-ID').format(price);
+    new Intl.NumberFormat('id-ID').format(price || 0);
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.85}
+      onPress={() => router.push({ pathname: '/car-detail', params: { id: car.id } })}
+    >
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUri }}
@@ -63,12 +69,6 @@ export default function CarCard({ car }: CarCardProps) {
           onError={() => setImgError(true)}
         />
         <View style={styles.imageOverlay} />
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{car.condition}</Text>
-        </View>
-        <View style={styles.yearBadge}>
-          <Text style={styles.yearText}>{car.year}</Text>
-        </View>
       </View>
 
       <View style={[styles.body, isSmall && { padding: 14 }]}>
@@ -77,22 +77,34 @@ export default function CarCard({ car }: CarCardProps) {
 
         <View style={[styles.infoRow, isSmall && { padding: 10 }]}>
           <View style={styles.infoItem}>
-            <Ionicons name="settings-outline" size={16} color="#64748b" />
+            <Ionicons name="calendar-outline" size={16} color="#cbd5e1" />
+            <Text style={[styles.infoText, isSmall && { fontSize: 11 }]}>{car.year}</Text>
+          </View>
+          <View style={styles.separator} />
+          <View style={styles.infoItem}>
+            <Ionicons name="settings-outline" size={16} color="#cbd5e1" />
             <Text style={[styles.infoText, isSmall && { fontSize: 11 }]}>{car.transmission}</Text>
           </View>
           <View style={styles.separator} />
           <View style={styles.infoItem}>
-            <Ionicons name="people-outline" size={16} color="#64748b" />
+            <Ionicons name="people-outline" size={16} color="#cbd5e1" />
             <Text style={[styles.infoText, isSmall && { fontSize: 11 }]}>{car.passengers} Kursi</Text>
           </View>
         </View>
 
-        <View style={styles.featuresRow}>
-          {car.features?.slice(0, 3).map((f, i) => (
-            <View key={i} style={styles.featureChip}>
-              <Text style={[styles.featureText, isSmall && { fontSize: 10 }]}>{f}</Text>
-            </View>
-          ))}
+        <View style={styles.chipsRow}>
+          <View style={[styles.chip, car.condition === 'Baru' ? styles.chipNew : styles.chipUsed]}>
+            <Text style={[styles.chipText, car.condition === 'Baru' ? styles.chipNewText : styles.chipUsedText]}>
+              {car.condition === 'Baru' ? 'Baru' : 'Bekas'}
+            </Text>
+          </View>
+          <View style={styles.featuresRow}>
+            {car.features?.slice(0, 2).map((f, i) => (
+              <View key={i} style={styles.featureChip}>
+                <Text style={[styles.featureText, isSmall && { fontSize: 10 }]}>{f}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View style={styles.footer}>
@@ -108,7 +120,7 @@ export default function CarCard({ car }: CarCardProps) {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -138,39 +150,26 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(10,15,30,0.3)',
   },
-  badge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: '#dc2626',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '800' },
-  yearBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    backgroundColor: 'rgba(15,23,42,0.8)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  yearText: { color: '#94a3b8', fontSize: 11, fontWeight: '700' },
   body: { padding: 18 },
   name: { fontSize: 18, fontWeight: '900', color: '#f1f5f9', marginBottom: 3 },
-  brand: { fontSize: 13, color: '#475569', fontWeight: '600', marginBottom: 14 },
+  brand: { fontSize: 13, color: '#cbd5e1', fontWeight: '600', marginBottom: 14 },
   infoRow: {
-    flexDirection: 'row', alignItems: 'center', marginBottom: 14,
+    flexDirection: 'row', alignItems: 'center', marginBottom: 12,
     backgroundColor: '#0f172a', borderRadius: 12, padding: 12,
   },
   infoItem: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' },
   separator: { width: 1, height: 20, backgroundColor: '#334155' },
-  infoText: { fontSize: 12, color: '#94a3b8', fontWeight: '600' },
-  featuresRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 },
+  infoText: { fontSize: 12, color: '#cbd5e1', fontWeight: '600' },
+  chipsRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16,
+  },
+  chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
+  chipNew: { backgroundColor: 'rgba(22,163,74,0.12)', borderColor: 'rgba(22,163,74,0.25)' },
+  chipUsed: { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' },
+  chipText: { fontSize: 11, fontWeight: '700' },
+  chipNewText: { color: '#16a34a' },
+  chipUsedText: { color: '#f87171' },
+  featuresRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   featureChip: {
     backgroundColor: 'rgba(220,38,38,0.12)',
     borderColor: 'rgba(220,38,38,0.25)',
@@ -184,7 +183,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     borderTopWidth: 1, borderTopColor: '#334155', paddingTop: 14,
   },
-  priceLabel: { fontSize: 11, color: '#475569', marginBottom: 3, fontWeight: '600' },
+  priceLabel: { fontSize: 11, color: '#cbd5e1', marginBottom: 3, fontWeight: '600' },
   price: { fontSize: 18, fontWeight: '900', color: '#dc2626' },
   waButton: {
     backgroundColor: '#16a34a', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,

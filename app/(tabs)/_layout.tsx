@@ -16,10 +16,10 @@ function HomeTabIcon({ focused }: { focused: boolean }) {
   const isSmall = SCREEN_W < 375;
   return (
     <View style={styles.homeButton}>
-      <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: isSmall ? 60 : 70, height: isSmall ? 60 : 70, borderRadius: isSmall ? 30 : 35 }]}>
+      <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: isSmall ? 56 : 64, height: isSmall ? 56 : 64, borderRadius: isSmall ? 28 : 32 }]}>
         <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 30} color="#fff" />
       </View>
-      <Text style={[styles.homeLabel, focused && styles.homeLabelActive, { fontSize: isSmall ? 8 : 10 }]} numberOfLines={1} adjustsFontSizeToFit>Beranda</Text>
+      <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1} adjustsFontSizeToFit>Beranda</Text>
     </View>
   );
 }
@@ -53,18 +53,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="contact"
-        options={{
-          tabBarItemStyle: { flex: 1 },
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="call-outline" label="Kontak" />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
-          tabBarItemStyle: { flex: 2 },
+          tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => <HomeTabIcon focused={focused} />,
         }}
       />
@@ -78,22 +69,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="tentang"
+        name="akun"
         options={{
           tabBarItemStyle: { flex: 1 },
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="information-circle-outline" label="Tentang" />
+            <TabIcon focused={focused} icon="person-outline" label="Akun" />
           ),
         }}
       />
       <Tabs.Screen
+        name="contact"
+        options={{ href: null, tabBarItemStyle: { display: 'none' } }}
+      />
+      <Tabs.Screen
         name="faq"
-        options={{
-          tabBarItemStyle: { flex: 1 },
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="help-circle-outline" label="Bantuan" />
-          ),
-        }}
+        options={{ href: null, tabBarItemStyle: { display: 'none' } }}
+      />
+      <Tabs.Screen
+        name="tentang"
+        options={{ href: null, tabBarItemStyle: { display: 'none' } }}
       />
     </Tabs>
   );
@@ -105,7 +99,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#1e293b',
     height: Platform.OS === 'ios' ? 85 : 65,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
@@ -123,8 +117,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.15 }],
   },
   label: {
-    fontSize: 9,
-    color: '#64748b',
+    fontSize: 10,
+    color: '#94a3b8',
     fontWeight: '600',
   },
   labelActive: {
@@ -135,13 +129,14 @@ const styles = StyleSheet.create({
   // Home center button
   homeButton: {
     alignItems: 'center',
-    marginTop: -20,
+    marginTop: -22,
     justifyContent: 'center',
+    gap: 4,
   },
   homeInner: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#dc2626',
     borderWidth: 4,
     borderColor: '#0a0f1e',
@@ -157,11 +152,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#b91c1c',
     shadowOpacity: 0.8,
   },
-  homeLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    fontWeight: '700',
-    marginTop: 4,
-  },
-  homeLabelActive: { color: '#dc2626' },
 });
+

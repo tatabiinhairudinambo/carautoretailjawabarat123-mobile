@@ -22,6 +22,7 @@ export default function CarsScreen() {
   const isSmall = SCREEN_W < 375;
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Semua');
 
@@ -31,14 +32,23 @@ export default function CarsScreen() {
 
   const loadCars = async () => {
     setLoading(true);
-    const { data } = await supabase.from('cars').select('*').order('featured', { ascending: false });
+    const { data } = await supabase.from('cars').select('*');
     if (data) setCars(data);
     setLoading(false);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const { data } = await supabase.from('cars').select('*');
+    if (data) setCars(data);
+    setRefreshing(false);
+  };
+
   const filtered = cars.filter((c) => {
-    const matchBrand = selectedBrand === 'Semua' || c.brand === selectedBrand;
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const brand = c?.brand || '';
+    const name = c?.name || '';
+    const matchBrand = selectedBrand === 'Semua' || brand.toLowerCase() === selectedBrand.toLowerCase();
+    const matchSearch = name.toLowerCase().includes(search.toLowerCase());
     return matchBrand && matchSearch;
   });
 
@@ -75,23 +85,35 @@ export default function CarsScreen() {
       </View>
 
       {/* Brand Filter */}
-      <FlatList
-        data={BRANDS}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item}
-        contentContainerStyle={[styles.filterList, isSmall && { paddingHorizontal: 12, gap: 6 }]}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.filterChip, selectedBrand === item && styles.filterChipActive, isSmall && { paddingHorizontal: 14, paddingVertical: 7 }]}
-            onPress={() => setSelectedBrand(item)}
-          >
-            <Text style={[styles.filterText, selectedBrand === item && styles.filterTextActive, isSmall && { fontSize: 12 }]}>
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={{ flexGrow: 0, flexShrink: 0 }}>
+        <FlatList
+          data={BRANDS}
+          horizontal
+          style={{ flexGrow: 0 }}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item}
+          contentContainerStyle={[styles.filterList, isSmall && { paddingHorizontal: 12, gap: 8 }]}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.filterChip,
+                selectedBrand === item && styles.filterChipActive,
+                isSmall && { paddingHorizontal: 16, paddingVertical: 8, minWidth: 70 }
+              ]}
+              onPress={() => setSelectedBrand(item)}
+              activeOpacity={0.8}
+            >
+              <Text style={[
+                styles.filterText,
+                selectedBrand === item && styles.filterTextActive,
+                isSmall && { fontSize: 13 }
+              ]}>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       {/* Cars List */}
       {loading ? (
@@ -103,6 +125,8 @@ export default function CarsScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           renderItem={({ item }) => <CarCard car={item} />}
           contentContainerStyle={isSmall ? { paddingHorizontal: 12, paddingBottom: 20 } : styles.list}
           showsVerticalScrollIndicator={false}
@@ -125,8 +149,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16,
     borderBottomWidth: 1, borderBottomColor: '#1e293b',
   },
-  title: { fontSize: 24, fontWeight: '900', color: '#f1f5f9', letterSpacing: 0.3 },
-  subtitle: { fontSize: 13, color: '#475569', marginTop: 3, fontWeight: '600' },
+  title: { fontSize: 24, fontWeight: '900', color: '#ffffff', letterSpacing: 0.3 },
+  subtitle: { fontSize: 13, color: '#ffffff', marginTop: 3, fontWeight: '600' },
   headerBadge: {
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: '#1e293b', alignItems: 'center', justifyContent: 'center',
@@ -142,14 +166,15 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: 14, color: '#f1f5f9', paddingVertical: 13 },
 
-  filterList: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
+  filterList: { paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14, gap: 10 },
   filterChip: {
-    paddingHorizontal: 18, paddingVertical: 9, borderRadius: 22,
-    backgroundColor: '#1e293b', borderWidth: 1, borderColor: '#334155',
+    paddingHorizontal: 22, paddingVertical: 10, borderRadius: 24, minWidth: 90,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#1e293b', borderWidth: 1.5, borderColor: '#64748b',
   },
-  filterChipActive: { backgroundColor: '#dc2626', borderColor: '#dc2626' },
-  filterText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
-  filterTextActive: { color: '#fff' },
+  filterChipActive: { backgroundColor: '#dc2626', borderColor: '#ef4444' },
+  filterText: { fontSize: 14, fontWeight: '800', color: '#e2e8f0' },
+  filterTextActive: { color: '#ffffff' },
 
   list: { paddingHorizontal: 16, paddingBottom: 20 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },

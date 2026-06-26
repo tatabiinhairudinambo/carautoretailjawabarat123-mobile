@@ -85,7 +85,7 @@ export default function ContactScreen() {
           <View style={styles.header}>
             <View>
               <Text style={styles.title}>Hubungi Kami</Text>
-              <Text style={styles.subtitle}>Kami siap membantu 24/7</Text>
+              {/* subtitle removed */}
             </View>
             <View style={styles.headerBadge}>
               <Ionicons name="call" size={22} color="#f1f5f9" />

@@ -17,11 +17,11 @@ export default function TestimonialCard({ item }: TestimonialCardProps) {
   const isSmall = SCREEN_W < 375;
 
   const initials = item.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
-  const colors = ['#dc2626', '#2563eb', '#16a34a', '#9333ea', '#d97706'];
+  const colors = ['#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b'];
   const color = colors[item.name.charCodeAt(0) % colors.length];
 
   return (
-    <View style={[styles.card, { width: cardWidth }, isSmall && { padding: 12 }]}>
+    <View style={[styles.card, { width: cardWidth }, isSmall && { padding: 14 }]}>
       <View style={styles.header}>
         <View style={[styles.avatar, { backgroundColor: color }, isSmall && { width: 36, height: 36 }]}>
           <Text style={[styles.avatarText, isSmall && { fontSize: 12 }]}>{initials}</Text>
@@ -30,7 +30,7 @@ export default function TestimonialCard({ item }: TestimonialCardProps) {
           <Text style={[styles.name, isSmall && { fontSize: 13 }]}>{item.name}</Text>
           <View style={styles.stars}>
             {[...Array(5)].map((_, i) => (
-              <Ionicons key={i} name="star" size={isSmall ? 12 : 14} color={i < item.rating ? '#f59e0b' : '#d1d5db'} style={{ marginRight: 2 }} />
+              <Ionicons key={i} name="star" size={isSmall ? 12 : 14} color={i < item.rating ? '#f59e0b' : '#475569'} style={{ marginRight: 2 }} />
             ))}
             {item.date && <Text style={[styles.date, isSmall && { fontSize: 10 }]}> • {item.date}</Text>}
           </View>
@@ -43,55 +43,65 @@ export default function TestimonialCard({ item }: TestimonialCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginRight: 12,
+    backgroundColor: '#1e293b',
+    borderRadius: 18,
+    padding: 18,
+    marginRight: 14,
     width: 280,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: '#334155',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
+    gap: 12,
+    marginBottom: 12,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   avatarText: {
     color: '#fff',
     fontWeight: '800',
     fontSize: 14,
+    letterSpacing: 0.5,
   },
   name: {
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 14,
-    color: '#111827',
+    color: '#f8fafc',
+    letterSpacing: 0.2,
   },
   stars: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 3,
   },
   date: {
     fontSize: 11,
-    color: '#9ca3af',
+    color: '#64748b',
+    fontWeight: '500',
   },
   comment: {
     fontSize: 13,
-    color: '#4b5563',
-    lineHeight: 20,
+    color: '#cbd5e1',
+    lineHeight: 21,
     fontStyle: 'italic',
+    fontWeight: '400',
   },
 });
+

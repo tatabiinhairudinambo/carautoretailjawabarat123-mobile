@@ -9,14 +9,17 @@ import {
   StatusBar,
   useWindowDimensions,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
 interface PriceItem {
+  car_id?: string;
   name: string;
   duration: string;
   price: number;
@@ -48,14 +51,22 @@ const notes = [
 ];
 
 export default function PricesScreen() {
+  const router = useRouter();
   const { width: SCREEN_W } = useWindowDimensions();
   const isSmall = SCREEN_W < 375;
   const [prices, setPrices] = useState<PriceCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadPrices();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadPrices();
+    setRefreshing(false);
+  };
 
   const loadPrices = async () => {
     const { data } = await supabase
@@ -75,6 +86,7 @@ export default function PricesScreen() {
           };
         }
         grouped[row.category].items.push({
+          car_id: row.car_id,
           name: row.name,
           duration: row.duration,
           price: row.price,
@@ -93,7 +105,10 @@ export default function PricesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#dc2626" colors={['#dc2626']} />}
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
@@ -138,23 +153,27 @@ export default function PricesScreen() {
                 </View>
 
                 {cat.items.map((item, i) => (
-                  <View key={i} style={[styles.tableRow, i % 2 === 1 && styles.tableRowAlt, isSmall && { paddingHorizontal: 10, paddingVertical: 10 }]}>
+                  <TouchableOpacity
+                    key={i}
+                    style={[styles.tableRow, i % 2 === 1 && styles.tableRowAlt, isSmall && { paddingHorizontal: 10, paddingVertical: 10 }]}
+                    activeOpacity={0.7}
+                    onPress={() => router.push({ pathname: '/car-detail', params: { id: item.car_id || '', name: item.name } })}
+                  >
                     <Text style={[styles.rowName, { flex: 2 }, isSmall && { fontSize: 11 }]} numberOfLines={2}>{item.name}</Text>
                     <View style={[styles.durationBadge, { flex: 1, alignSelf: 'center' }, isSmall && { paddingHorizontal: 6, paddingVertical: 3 }]}>
                       <Text style={[styles.durationText, isSmall && { fontSize: 10 }]}>{item.duration}</Text>
                     </View>
                     <Text style={[styles.priceText, { flex: 1.5 }, isSmall && { fontSize: 11 }]}>{formatPrice(item.price)}</Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             ))}
 
-            {/* Notes */}
+            {/* Notes Section */}
+            <Text style={[styles.notesTitle, isSmall && { fontSize: 16 }, { textAlign: 'center', marginBottom: 4, marginTop: 16 }]}>
+              Catatan Penting
+            </Text>
             <View style={[styles.notesCard, isSmall && { margin: 12, padding: 14 }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 8 }}>
-                <Ionicons name="clipboard" size={18} color="#f1f5f9" />
-                <Text style={[styles.notesTitle, isSmall && { fontSize: 14 }, { marginBottom: 0 }]}>Catatan Penting</Text>
-              </View>
               {notes.map((note, i) => (
                 <View key={i} style={styles.noteRow}>
                   <View style={styles.noteDot} />
