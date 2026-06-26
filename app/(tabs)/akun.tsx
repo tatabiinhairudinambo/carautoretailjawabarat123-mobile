@@ -123,15 +123,23 @@ export default function AkunScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+
+      {/* Fixed Hero Red Burgundy Glass Header */}
+      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+        <View style={styles.headerOverlay} />
+
+        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
+          <Text style={styles.locSubtitle}>MEMBER VIP RESMI</Text>
+          <Text style={styles.heroBigTitle}>Profil Eksekutif</Text>
+          <Text style={styles.heroSubText}>Kelola hak akses VIP, preferensi perjalanan & verifikasi akun Anda</Text>
+        </View>
+      </ImageBackground>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#dc2626" colors={['#dc2626']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
+        contentContainerStyle={{ paddingBottom: 110, paddingTop: 14 }}
       >
-        {/* Header */}
-        <View style={styles.headerBar}>
-          <Text style={styles.headerTitle}>Akun</Text>
-        </View>
-
         {loading ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator size="large" color="#dc2626" />
@@ -271,8 +279,6 @@ export default function AkunScreen() {
             <Text style={styles.footerText}>Car Auto Retail Jawa Barat v1.0</Text>
           </View>
         )}
-
-        <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* Sleek Action Sheet Modal */}
@@ -312,9 +318,59 @@ export default function AkunScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
   loadingWrap: { alignItems: 'center', justifyContent: 'center', padding: 60 },
-  headerBar: { alignItems: 'center', paddingTop: 20, paddingBottom: 8 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: '#f1f5f9' },
-  content: { paddingHorizontal: 24, paddingTop: 16 },
+  headerBg: {
+    width: '100%',
+    paddingTop: 24,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#ff1a3c',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  headerBgImg: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(88, 19, 55, 0.92)',
+  },
+  headerHeroTextWrap: {
+    paddingHorizontal: 20,
+    paddingBottom: 4,
+    alignItems: 'center',
+  },
+  locSubtitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#fca5a5',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  heroBigTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: 0.5,
+    fontFamily: 'Arial',
+    textAlign: 'center',
+  },
+  heroSubText: {
+    fontSize: 12,
+    color: '#f8fafc',
+    marginTop: 4,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 10,
+  },
+  content: { paddingHorizontal: 20, paddingTop: 10 },
 
   profileCard: {
     backgroundColor: '#1e293b', borderRadius: 20,
