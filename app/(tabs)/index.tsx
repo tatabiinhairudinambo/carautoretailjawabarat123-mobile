@@ -222,9 +222,9 @@ export default function HomeScreen() {
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
         scrollEventThrottle={16}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
       >
-        {/* Top Gradient Header ala Rujukan */}
+        {/* Pilot Header ala Unicorn Mockup */}
         <Animated.View style={[styles.topHeaderWrap, { transform: [{ translateY: headerTranslateY }] }]}>
           <ImageBackground
             source={require('../../assets/logo.jpg')}
@@ -233,7 +233,20 @@ export default function HomeScreen() {
           >
             <View style={styles.topHeaderOverlay} />
             <SafeAreaView edges={['top']} style={styles.topHeaderContent}>
-              <View style={styles.topNavRow}>
+              <View style={styles.pilotNavRow}>
+                <View style={styles.pilotLeftGroup}>
+                  <TouchableOpacity style={styles.pilotPinCircle} activeOpacity={0.8} onPress={() => router.push('/wilayah')}>
+                    <Ionicons name="location" size={20} color="#ffffff" />
+                  </TouchableOpacity>
+                  <View style={{ marginLeft: 12 }}>
+                    <Text style={styles.pilotLocLabel}>Lokasi Pilihan</Text>
+                    <TouchableOpacity style={styles.pilotLocValRow} onPress={() => router.push('/wilayah')} activeOpacity={0.8}>
+                      <Text style={styles.pilotLocValText}>Jawa Barat, ID</Text>
+                      <Ionicons name="chevron-down" size={16} color="#fbbf24" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
                 <TouchableOpacity style={styles.avatarWrap} onPress={() => router.push('/akun')} activeOpacity={0.8}>
                   {avatarUrl ? (
                     <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
@@ -243,66 +256,108 @@ export default function HomeScreen() {
                     </View>
                   )}
                 </TouchableOpacity>
-
-                <TouchableOpacity style={styles.bellBtn} onPress={() => router.push('/history')} activeOpacity={0.8}>
-                  <Ionicons name="notifications" size={20} color="#fff" />
-                </TouchableOpacity>
               </View>
 
               <Animated.View style={[styles.balanceCenterWrap, { opacity: headerTextOpacity, transform: [{ scale: headerTextScale }] }]}>
-                <Text style={styles.balanceLabel}>Armada Tersedia Jabar</Text>
-                <Text style={[styles.balanceValue, isSmall && { fontSize: 36 }]}>50+ Unit</Text>
+                <Text style={styles.balanceLabel}>Pusat Rental Mobil Eksekutif</Text>
+                <Text style={[styles.balanceValue, isSmall && { fontSize: 32 }]}>Car Auto Retail</Text>
               </Animated.View>
             </SafeAreaView>
           </ImageBackground>
         </Animated.View>
 
-        {/* Floating Quick Action Pill */}
-        <View style={styles.floatingActionContainer}>
-          <AnimatedCard delay={100} style={styles.floatingActionCard}>
-            <View style={styles.quickActionRow}>
-              {quickActions.map((qa, i) => (
-                <TouchableOpacity
-                  key={qa.label}
-                  style={styles.quickActionItem}
-                  onPress={() => handleQuickAction(qa)}
-                  activeOpacity={0.75}
-                >
-                  <View style={styles.quickActionIconCircle}>
-                    <Ionicons name={qa.icon as any} size={22} color="#ef4444" />
-                  </View>
-                  <Text style={styles.quickActionText}>{qa.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </AnimatedCard>
-        </View>
+        {/* Main Body Overlapping Curved Sheet */}
+        <View style={styles.unicornSheet}>
+          <View style={styles.dragHandlePill} />
 
-        {/* Main Body Curved Sheet */}
-        <View style={styles.bodySheet}>
-          {/* Menu Layanan (Payment List) */}
-          <Text style={styles.sectionTitle}>Menu Layanan</Text>
-          <View style={styles.paymentGrid}>
+          {/* Search Pill */}
+          <TouchableOpacity style={styles.mockupSearchPill} onPress={() => router.push('/cars')} activeOpacity={0.9}>
+            <Ionicons name="search" size={20} color="#64748b" style={{ marginRight: 10 }} />
+            <Text style={styles.mockupSearchText}>Cari kendaraan impian Anda...</Text>
+          </TouchableOpacity>
+
+          {/* Hero Featured Card (Top Chart of the Day) */}
+          <View style={styles.heroPromoBox}>
+            <ImageBackground source={require('../../assets/logo.jpg')} style={styles.heroPromoBg} imageStyle={{ borderRadius: 24 }}>
+              <View style={styles.heroPromoOverlay} />
+              <View style={styles.heroPromoInner}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.heroPromoChartText}>TOP CHART OF THE DAY</Text>
+                  <Text style={styles.heroPromoBigTitle}>Sewa Mobil VIP & Lepas Kunci Jabar</Text>
+                  <TouchableOpacity style={styles.yellowMockupBtn} onPress={claimPromo} activeOpacity={0.8}>
+                    <Ionicons name="play" size={16} color="#0f172a" style={{ marginRight: 6 }} />
+                    <Text style={styles.yellowMockupBtnText}>Pesan Sekarang</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.heroCarFloatWrap}>
+                  <Ionicons name="car-sport" size={isSmall ? 68 : 82} color="#ffffff" style={styles.carNeonGlow} />
+                </View>
+              </View>
+            </ImageBackground>
+          </View>
+
+          {/* Floating Quick Action Row */}
+          <View style={styles.quickActionSheetRow}>
+            {quickActions.map((qa, i) => (
+              <TouchableOpacity
+                key={qa.label}
+                style={styles.quickActionItem}
+                onPress={() => handleQuickAction(qa)}
+                activeOpacity={0.75}
+              >
+                <View style={styles.quickActionIconCircle}>
+                  <Ionicons name={qa.icon as any} size={22} color="#ef4444" />
+                </View>
+                <Text style={styles.quickActionText}>{qa.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Top Brands Grid */}
+          <View style={styles.brandsHeaderRow}>
+            <Text style={styles.sectionTitle}>Top Brands</Text>
+            <TouchableOpacity onPress={() => router.push('/cars')}>
+              <Text style={styles.seeMoreText}>Lihat Semua</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.brandsGrid}>
             {paymentList.map((item, index) => (
               <AnimatedCard
                 key={item.label}
-                delay={index * 60}
-                style={[styles.paymentItem, { width: isSmall ? '24%' : '23%' }]}
-                onPress={() => router.push(item.route as any)}
+                delay={index * 50}
+                style={[styles.brandChip, { width: isSmall ? '23%' : '22%' }]}
+                onPress={() => router.push('/cars')}
               >
-                <View style={styles.paymentIconBox}>
+                <View style={styles.brandIconBox}>
                   <Ionicons name={item.icon as any} size={26} color={item.color} />
                 </View>
-                <Text style={styles.paymentLabel} numberOfLines={1}>
+                <Text style={styles.brandLabel} numberOfLines={1}>
                   {item.label}
                 </Text>
               </AnimatedCard>
             ))}
           </View>
 
+          {/* Identify Closest Vehicle Map Banner */}
+          <TouchableOpacity style={styles.mapBannerCard} onPress={() => router.push('/wilayah')} activeOpacity={0.85}>
+            <View style={styles.mapGraphicBox}>
+              <Ionicons name="map" size={42} color="#3b82f6" />
+              <View style={styles.mapPinOverlay}>
+                <Ionicons name="location" size={22} color="#ef4444" />
+              </View>
+            </View>
+            <View style={{ flex: 1, paddingHorizontal: 14 }}>
+              <Text style={styles.mapBannerTitle}>Temukan Unit Terdekat</Text>
+              <Text style={styles.mapBannerSub}>Deteksi armada terdekat di Jawa Barat</Text>
+            </View>
+            <View style={styles.mapArrowCircle}>
+              <Ionicons name="chevron-forward" size={18} color="#ffffff" />
+            </View>
+          </TouchableOpacity>
+
           {/* Promo & Penawaran */}
           <View style={styles.promoHeaderRow}>
-            <Text style={styles.sectionTitle}>Promo & Penawaran</Text>
+            <Text style={styles.sectionTitle}>Armada Pilihan Terpopuler</Text>
             <TouchableOpacity onPress={() => router.push('/cars')} activeOpacity={0.7}>
               <Text style={styles.seeMoreText}>Lihat Semua</Text>
             </TouchableOpacity>
@@ -821,8 +876,250 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: '900',
+  },
+  modalTitleText: { fontSize: 18, fontWeight: '800', color: '#1e293b' },
+  modalSubText: { fontSize: 14, color: '#64748b', textAlign: 'center', marginVertical: 12 },
+  modalCloseBtn: { backgroundColor: '#dc2626', paddingVertical: 12, borderRadius: 12, width: '100%', alignItems: 'center' },
+  modalCloseBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  // Unicorn UI Styles
+  pilotNavRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  pilotLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  pilotPinCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  pilotLocLabel: {
+    fontSize: 12,
+    color: '#fecdd3',
+    fontFamily: 'Arial',
+    fontWeight: '600',
+  },
+  pilotLocValRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
   },
+  pilotLocValText: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+  },
+  unicornSheet: {
+    marginTop: -32,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    backgroundColor: '#0a0f1e',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    zIndex: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  dragHandlePill: {
+    width: 42,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#334155',
+    alignSelf: 'center',
+    marginVertical: 12,
+    marginBottom: 18,
+  },
+  mockupSearchPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1e293b',
+    borderRadius: 22,
+    height: 50,
+    paddingHorizontal: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  mockupSearchText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    fontFamily: 'Arial',
+    fontWeight: '600',
+  },
+  heroPromoBox: {
+    marginBottom: 24,
+    borderRadius: 24,
+    elevation: 8,
+    shadowColor: '#881337',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+  },
+  heroPromoBg: {
+    width: '100%',
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  heroPromoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(76, 29, 149, 0.92)',
+  },
+  heroPromoInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 22,
+  },
+  heroPromoChartText: {
+    fontSize: 11,
+    color: '#e9d5ff',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  heroPromoBigTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+    lineHeight: 26,
+    marginBottom: 16,
+  },
+  yellowMockupBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#facc15',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 24,
+    alignSelf: 'flex-start',
+    shadowColor: '#facc15',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  yellowMockupBtnText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0f172a',
+    fontFamily: 'Arial',
+  },
+  heroCarFloatWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -10,
+  },
+  carNeonGlow: {
+    textShadowColor: '#ffffff',
+    textShadowRadius: 15,
+  },
+  quickActionSheetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  brandsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  brandsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 16,
+    marginBottom: 28,
+  },
+  brandChip: {
+    alignItems: 'center',
+  },
+  brandIconBox: {
+    width: 62,
+    height: 62,
+    borderRadius: 18,
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    borderWidth: 1.2,
+    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  brandLabel: {
+    color: '#e2e8f0',
+    fontSize: 12,
+    fontFamily: 'Arial',
+    fontWeight: '700',
+  },
+  mapBannerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1e293b',
+    borderRadius: 22,
+    padding: 16,
+    marginBottom: 28,
+    borderWidth: 1.5,
+    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  mapGraphicBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: '#0f172a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  mapPinOverlay: {
+    position: 'absolute',
+  },
+  mapBannerTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+  },
+  mapBannerSub: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginTop: 3,
+    fontFamily: 'Arial',
+  },
+  mapArrowCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#6d28d9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   promoPricePer: {
     color: '#ef4444',
     fontSize: 11,

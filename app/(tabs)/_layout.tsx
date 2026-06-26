@@ -20,8 +20,8 @@ function HomeTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={styles.tabContainer}>
       <View style={styles.iconSlot}>
-        <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, bottom: -4 }]}>
-          <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 28} color="#fff" style={focused ? styles.iconGlowActive : undefined} />
+        <View style={[styles.homeInner, focused && styles.homeInnerActive, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, bottom: -2 }]}>
+          <Ionicons name={focused ? 'home' : 'home-outline'} size={isSmall ? 26 : 28} color="#fff" style={styles.iconGlowWhite} />
         </View>
       </View>
       <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>Home</Text>
@@ -109,15 +109,15 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: 'transparent',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.2)',
+    borderTopColor: 'rgba(255,255,255,0.22)',
     height: Platform.OS === 'ios' ? 88 : 68,
     paddingHorizontal: 8,
     paddingTop: 8,
-    paddingBottom: Platform.OS === 'ios' ? 22 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
     elevation: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
   },
   tabBarOverlay: {
@@ -166,24 +166,29 @@ const styles = StyleSheet.create({
   // Home center button circle
   homeInner: {
     position: 'absolute',
-    backgroundColor: '#dc2626',
-    borderWidth: 3.5,
-    borderColor: '#0f172a',
+    backgroundColor: '#ff334b',
+    borderWidth: 3,
+    borderColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#ff334b',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.85,
+    shadowRadius: 18,
+    elevation: 16,
   },
   homeInnerActive: {
-    backgroundColor: '#ff1a1a',
-    shadowColor: '#ff3333',
+    backgroundColor: '#ff1a3c',
+    borderColor: '#ffffff',
+    shadowColor: '#ff1a3c',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 18,
-    elevation: 20,
+    shadowRadius: 26,
+    elevation: 22,
+  },
+  iconGlowWhite: {
+    textShadowColor: '#ffffff',
+    textShadowRadius: 10,
   },
 });
 

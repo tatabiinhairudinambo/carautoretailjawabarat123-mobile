@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StatusBar,
   useWindowDimensions,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -56,35 +57,51 @@ export default function CarsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
 
-      {/* Header */}
-      <View style={[styles.header, isSmall && { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 }]}>
-        <View>
-          <Text style={[styles.title, isSmall && { fontSize: 20 }]}>Armada Kami</Text>
-          <Text style={[styles.subtitle, isSmall && { fontSize: 12 }]}>{filtered.length} unit tersedia</Text>
-        </View>
-        <View style={[styles.headerBadge, isSmall && { width: 38, height: 38 }]}>
-          <Ionicons name="car-sport" size={isSmall ? 20 : 24} color="#dc2626" />
-        </View>
-      </View>
+      {/* Hero Reference Mockup Header */}
+      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+        <View style={styles.headerOverlay} />
 
-      {/* Search */}
-      <View style={[styles.searchContainer, isSmall && { marginHorizontal: 12, marginVertical: 8 }]}>
-        <Ionicons name="search" size={18} color="#475569" style={{ marginRight: 8 }} />
-        <TextInput
-          style={[styles.searchInput, isSmall && { fontSize: 13, paddingVertical: 11 }]}
-          placeholder="Cari nama mobil..."
-          placeholderTextColor="#475569"
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search !== '' && (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={18} color="#475569" />
+        {/* Top Row: Location & Glass Notification Button */}
+        <View style={[styles.topRow, isSmall && { paddingHorizontal: 16, paddingTop: 12 }]}>
+          <View>
+            <Text style={styles.locSubtitle}>Location</Text>
+            <View style={styles.locTitleRow}>
+              <Ionicons name="location" size={18} color="#fbbf24" style={{ marginRight: 6 }} />
+              <Text style={styles.locTitleText}>Jawa Barat, ID</Text>
+              <Ionicons name="chevron-down" size={16} color="#fbbf24" style={{ marginLeft: 4 }} />
+            </View>
+          </View>
+          <TouchableOpacity style={styles.notifBtn} activeOpacity={0.8}>
+            <Ionicons name="notifications" size={18} color="#ffffff" />
+            <View style={styles.notifDot} />
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
 
-      {/* Brand Filter */}
+        {/* Bottom Row: Compact White Search Pill + Gold Filter Button */}
+        <View style={[styles.searchRow, isSmall && { paddingHorizontal: 16, paddingBottom: 10 }]}>
+          <View style={styles.searchPill}>
+            <Ionicons name="search" size={15} color="#64748b" style={{ marginRight: 6 }} />
+            <TextInput
+              style={styles.searchInputPill}
+              placeholder="Cari armada..."
+              placeholderTextColor="#94a3b8"
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search !== '' && (
+              <TouchableOpacity onPress={() => setSearch('')}>
+                <Ionicons name="close-circle" size={16} color="#94a3b8" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TouchableOpacity style={styles.filterBtnGold} activeOpacity={0.8}>
+            <Ionicons name="options" size={18} color="#881337" />
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+
+      {/* Brand Filter Outside Header */}
       <View style={{ flexGrow: 0, flexShrink: 0 }}>
         <FlatList
           data={BRANDS}
@@ -144,36 +161,131 @@ export default function CarsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16,
-    borderBottomWidth: 1, borderBottomColor: '#1e293b',
+  headerBg: {
+    width: '100%',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    elevation: 12,
+    shadowColor: '#881337',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
   },
-  title: { fontSize: 24, fontWeight: '900', color: '#ffffff', letterSpacing: 0.3 },
-  subtitle: { fontSize: 13, color: '#ffffff', marginTop: 3, fontWeight: '600' },
-  headerBadge: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#1e293b', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: '#334155',
+  headerBgImg: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
   },
-  headerBadgeText: { fontSize: 22 },
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 14,
+  },
+  locSubtitle: {
+    fontSize: 12,
+    color: '#cbd5e1',
+    fontFamily: 'Arial',
+    fontWeight: '600',
+  },
+  locTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  locTitleText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#ffffff',
+    fontFamily: 'Arial',
+  },
+  notifBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  notifDot: {
+    position: 'absolute',
+    top: 6,
+    right: 7,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ef4444',
+    borderWidth: 1.5,
+    borderColor: '#881337',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+    paddingBottom: 16,
+    paddingTop: 2,
+  },
+  searchPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    height: 36,
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchInputPill: {
+    flex: 1,
+    fontSize: 12,
+    color: '#0f172a',
+    paddingVertical: 6,
+    fontFamily: 'Arial',
+    fontWeight: '600',
+  },
+  filterBtnGold: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#fbbf24',
+    marginLeft: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 
-  searchContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#1e293b', marginHorizontal: 16, marginVertical: 12,
-    borderRadius: 16, borderWidth: 1, borderColor: '#334155',
-    paddingHorizontal: 14, paddingVertical: 2,
-  },
-  searchInput: { flex: 1, fontSize: 14, color: '#f1f5f9', paddingVertical: 13 },
-
-  filterList: { paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14, gap: 10 },
+  filterList: { paddingHorizontal: 20, paddingVertical: 10, paddingBottom: 14, gap: 10 },
   filterChip: {
     paddingHorizontal: 22, paddingVertical: 10, borderRadius: 24, minWidth: 90,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#1e293b', borderWidth: 1.5, borderColor: '#64748b',
+    backgroundColor: '#1e293b', borderWidth: 1.5, borderColor: '#475569',
   },
-  filterChipActive: { backgroundColor: '#dc2626', borderColor: '#ef4444' },
-  filterText: { fontSize: 14, fontWeight: '800', color: '#e2e8f0' },
+  filterChipActive: {
+    backgroundColor: '#dc2626',
+    borderColor: '#ff4d4d',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  filterText: { fontSize: 14, fontWeight: '800', color: '#cbd5e1' },
   filterTextActive: { color: '#ffffff' },
 
   list: { paddingHorizontal: 16, paddingBottom: 20 },
