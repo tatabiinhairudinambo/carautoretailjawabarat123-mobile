@@ -43,12 +43,12 @@ const getCategoryIcon = (emoji: string) => {
   return 'car-sport';
 };
 
-const notes = [
-  'Harga belum termasuk BBM',
-  'Driver tersedia dengan biaya tambahan',
-  'Deposit wajib sesuai kebijakan',
-  'Pembayaran bisa transfer / tunai',
-  'Minimal sewa 12 jam',
+const notes: { text: string; icon: any; color: string }[] = [
+  { text: 'Harga belum termasuk BBM', icon: 'water-outline', color: '#38bdf8' },
+  { text: 'Driver tersedia dengan biaya tambahan', icon: 'person-outline', color: '#fbbf24' },
+  { text: 'Deposit wajib sesuai kebijakan', icon: 'shield-checkmark-outline', color: '#4ade80' },
+  { text: 'Pembayaran bisa transfer / tunai', icon: 'card-outline', color: '#a78bfa' },
+  { text: 'Minimal sewa 12 jam', icon: 'time-outline', color: '#f43f5e' },
 ];
 
 export default function PricesScreen() {
@@ -211,14 +211,20 @@ export default function PricesScreen() {
             ))}
 
             {/* Notes Section */}
-            <Text style={[styles.notesTitle, isSmall && { fontSize: 16 }, { textAlign: 'center', marginBottom: 4, marginTop: 16 }]}>
+            <Text style={[styles.notesTitle, isSmall && { fontSize: 16 }, { textAlign: 'center', marginBottom: 12, marginTop: 24 }]}>
               Catatan Penting
             </Text>
-            <View style={[styles.notesCard, isSmall && { margin: 12, padding: 14 }]}>
+            <View style={{ paddingBottom: 20 }}>
               {notes.map((note, i) => (
-                <View key={i} style={styles.noteRow}>
-                  <View style={styles.noteDot} />
-                  <Text style={[styles.noteItem, isSmall && { fontSize: 12 }]}>{note}</Text>
+                <View key={i} style={[styles.bookChapterCard, { marginTop: 0, marginBottom: 12, marginHorizontal: 16 }]}>
+                  <View style={[styles.bookChapterHeader, { borderLeftColor: note.color, borderBottomWidth: 0, padding: 16 }]}>
+                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: note.color + '15', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: note.color + '40' }}>
+                      <Ionicons name={note.icon} size={18} color={note.color} />
+                    </View>
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                      <Text style={[styles.bookCarName, { fontSize: 13, lineHeight: 18 }]} numberOfLines={2}>{note.text}</Text>
+                    </View>
+                  </View>
                 </View>
               ))}
             </View>
@@ -295,14 +301,36 @@ const styles = StyleSheet.create({
   durationText: { fontSize: 11, fontWeight: '700', color: '#60a5fa' },
   priceText: { fontSize: 12, fontWeight: '800', color: '#dc2626', textAlign: 'right' },
 
-  notesCard: {
-    backgroundColor: '#1e293b', margin: 16, borderRadius: 20, padding: 18,
-    borderWidth: 1, borderColor: '#334155', borderLeftWidth: 4, borderLeftColor: '#dc2626',
+  notesCardIndividual: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  noteIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noteItemIndividual: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#e2e8f0',
+    flex: 1,
+    lineHeight: 18,
   },
   notesTitle: { fontSize: 15, fontWeight: '800', color: '#f1f5f9', marginBottom: 14 },
-  noteRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
-  noteDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#dc2626' },
-  noteItem: { fontSize: 13, color: '#94a3b8', flex: 1, lineHeight: 20 },
 
   waButton: {
     backgroundColor: '#16a34a', marginHorizontal: 16, borderRadius: 16,
