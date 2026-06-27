@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Alert, ActivityIndicator, RefreshControl, Share, Image,
-  Modal, TextInput,
+  Modal, TextInput, ImageBackground, useWindowDimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,6 +14,8 @@ import AnimatedCard from '../../components/AnimatedCard';
 
 export default function AkunScreen() {
   const router = useRouter();
+  const { width: SCREEN_W } = useWindowDimensions();
+  const isSmall = SCREEN_W < 375;
   const [email, setEmail] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [fullName, setFullName] = useState('');
