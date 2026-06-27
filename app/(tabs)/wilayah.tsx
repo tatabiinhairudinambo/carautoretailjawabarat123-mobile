@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, StatusBar,
   TouchableOpacity, Linking, RefreshControl, useWindowDimensions,
-  ImageBackground,
+  ImageBackground, Animated
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -60,6 +60,20 @@ export default function WilayahScreen() {
   const isSmall = SCREEN_W < 375;
   const [refreshing, setRefreshing] = useState(false);
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const stickyBarOpacity = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -30],
+    extrapolate: 'clamp',
+  });
+
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 600);
@@ -71,45 +85,63 @@ export default function WilayahScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#881337" />
 
-      {/* Fixed Hero Red Burgundy Glass Header */}
-      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
-        <View style={styles.headerOverlay} />
+      {/* Sticky Animated Glass Top Bar */}
+      <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
+          <View style={styles.stickyBarOverlay} />
+          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+            <View style={styles.stickyTitleRow}>
+              <Text style={styles.stickyBarTitle}>Lokasi Layanan</Text>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </Animated.View>
 
-        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
-          <Text style={styles.locSubtitle}>JARINGAN SHOWROOM VIP</Text>
-          <Text style={styles.heroBigTitle}>Wilayah Layanan Resmi</Text>
-          <Text style={styles.heroSubText}>Jangkauan ekspres 24 jam di seluruh kota & kabupaten Jawa Barat</Text>
-        </View>
-      </ImageBackground>
-
-      {/* Fixed Trust Info Bar */}
-      <View style={{ paddingHorizontal: 16, marginTop: 14, marginBottom: 6 }}>
-        <View style={styles.trustBar}>
-          <View style={styles.trustItem}>
-            <Ionicons name="checkmark-circle" size={15} color="#10b981" />
-            <Text style={styles.trustText}>Ready 24 Jam</Text>
-          </View>
-          <View style={styles.trustDot} />
-          <View style={styles.trustItem}>
-            <Ionicons name="shield-checkmark" size={15} color="#3b82f6" />
-            <Text style={styles.trustText}>Asuransi All-Risk</Text>
-          </View>
-          <View style={styles.trustDot} />
-          <View style={styles.trustItem}>
-            <Ionicons name="flash" size={15} color="#f59e0b" />
-            <Text style={styles.trustText}>Fast Booking</Text>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
-        contentContainerStyle={{ paddingBottom: 110, paddingTop: 6 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
       >
+        {/* Animated Hero Red Burgundy Glass Header */}
+        <Animated.View style={[styles.headerWrap, { transform: [{ translateY: headerTranslateY }] }]}>
+          <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+            <View style={styles.headerOverlay} />
+            <SafeAreaView edges={['top']} style={{ paddingBottom: 22 }}>
+              <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
+                <Text style={styles.locSubtitle}>JARINGAN SHOWROOM VIP</Text>
+                <Text style={styles.heroBigTitle}>Wilayah Layanan Resmi</Text>
+                <Text style={styles.heroSubText}>Jangkauan ekspres 24 jam di seluruh kota & kabupaten Jawa Barat</Text>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+        </Animated.View>
+
+        {/* Trust Info Bar */}
+        <View style={{ paddingHorizontal: 16, marginTop: 14, marginBottom: 6 }}>
+          <View style={styles.trustBar}>
+            <View style={styles.trustItem}>
+              <Ionicons name="checkmark-circle" size={15} color="#10b981" />
+              <Text style={styles.trustText}>Ready 24 Jam</Text>
+            </View>
+            <View style={styles.trustDot} />
+            <View style={styles.trustItem}>
+              <Ionicons name="shield-checkmark" size={15} color="#3b82f6" />
+              <Text style={styles.trustText}>Asuransi All-Risk</Text>
+            </View>
+            <View style={styles.trustDot} />
+            <View style={styles.trustItem}>
+              <Ionicons name="flash" size={15} color="#f59e0b" />
+              <Text style={styles.trustText}>Fast Booking</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Grid Area */}
         <View style={[styles.grid, isSmall && { padding: 12 }]}>
           {regions.map((r, idx) => (
             <AnimatedCard
@@ -141,20 +173,62 @@ export default function WilayahScreen() {
         </View>
 
         <View style={{ height: 30 }} />
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  headerBg: {
+  stickyBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#881337',
+    zIndex: 999,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  stickyBarBg: {
     width: '100%',
-    paddingTop: 24,
-    paddingBottom: 22,
+  },
+  stickyBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  stickyBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  stickyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stickyBarTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+  },
+  headerWrap: {
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
+    backgroundColor: '#881337',
+  },
+  headerBg: {
+    width: '100%',
+    paddingTop: 10,
     borderBottomWidth: 1.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
     shadowColor: '#ff1a3c',
@@ -173,7 +247,7 @@ const styles = StyleSheet.create({
   },
   headerHeroTextWrap: {
     paddingHorizontal: 20,
-    paddingBottom: 4,
+    paddingTop: 20,
     alignItems: 'center',
   },
   locSubtitle: {
@@ -227,3 +301,4 @@ const styles = StyleSheet.create({
   badgeWrap: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.3)' },
   badgeText: { fontSize: 10, fontWeight: '700', color: '#ffffff' },
 });
+

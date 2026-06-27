@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   StatusBar,
   useWindowDimensions,
   ImageBackground,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,20 @@ export default function CarsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Semua');
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const stickyBarOpacity = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -30],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     loadCars();
@@ -53,55 +68,55 @@ export default function CarsScreen() {
     return matchBrand && matchSearch;
   });
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+  const renderHeader = () => (
+    <View>
+      {/* Animated Hero Header */}
+      <Animated.View style={[styles.headerWrap, { transform: [{ translateY: headerTranslateY }] }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+          <View style={styles.headerOverlay} />
 
-      {/* Hero Reference Mockup Header */}
-      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
-        <View style={styles.headerOverlay} />
-
-        {/* Top Row: Location & Glass Notification Button */}
-        <View style={[styles.topRow, isSmall && { paddingHorizontal: 16, paddingTop: 12 }]}>
-          <View>
-            <Text style={styles.locSubtitle}>Location</Text>
-            <View style={styles.locTitleRow}>
-              <Ionicons name="location" size={18} color="#fbbf24" style={{ marginRight: 6 }} />
-              <Text style={styles.locTitleText}>Jawa Barat, ID</Text>
-              <Ionicons name="chevron-down" size={16} color="#fbbf24" style={{ marginLeft: 4 }} />
+          {/* Top Row: Location & Glass Notification Button */}
+          <SafeAreaView edges={['top']} style={[styles.topRow, isSmall && { paddingHorizontal: 16, paddingTop: 12 }]}>
+            <View>
+              <Text style={styles.locSubtitle}>Location</Text>
+              <View style={styles.locTitleRow}>
+                <Ionicons name="location" size={18} color="#fbbf24" style={{ marginRight: 6 }} />
+                <Text style={styles.locTitleText}>Jawa Barat, ID</Text>
+                <Ionicons name="chevron-down" size={16} color="#fbbf24" style={{ marginLeft: 4 }} />
+              </View>
             </View>
+            <TouchableOpacity style={styles.notifBtn} activeOpacity={0.8}>
+              <Ionicons name="notifications" size={18} color="#ffffff" />
+              <View style={styles.notifDot} />
+            </TouchableOpacity>
+          </SafeAreaView>
+
+          {/* Bottom Row: Compact White Search Pill + Gold Filter Button */}
+          <View style={[styles.searchRow, isSmall && { paddingHorizontal: 16, paddingBottom: 10 }]}>
+            <View style={styles.searchPill}>
+              <Ionicons name="search" size={15} color="#64748b" style={{ marginRight: 6 }} />
+              <TextInput
+                style={styles.searchInputPill}
+                placeholder="Cari armada..."
+                placeholderTextColor="#94a3b8"
+                value={search}
+                onChangeText={setSearch}
+              />
+              {search !== '' && (
+                <TouchableOpacity onPress={() => setSearch('')}>
+                  <Ionicons name="close-circle" size={16} color="#94a3b8" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <TouchableOpacity style={styles.filterBtnGold} activeOpacity={0.8}>
+              <Ionicons name="options" size={18} color="#881337" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.notifBtn} activeOpacity={0.8}>
-            <Ionicons name="notifications" size={18} color="#ffffff" />
-            <View style={styles.notifDot} />
-          </TouchableOpacity>
-        </View>
+        </ImageBackground>
+      </Animated.View>
 
-        {/* Bottom Row: Compact White Search Pill + Gold Filter Button */}
-        <View style={[styles.searchRow, isSmall && { paddingHorizontal: 16, paddingBottom: 10 }]}>
-          <View style={styles.searchPill}>
-            <Ionicons name="search" size={15} color="#64748b" style={{ marginRight: 6 }} />
-            <TextInput
-              style={styles.searchInputPill}
-              placeholder="Cari armada..."
-              placeholderTextColor="#94a3b8"
-              value={search}
-              onChangeText={setSearch}
-            />
-            {search !== '' && (
-              <TouchableOpacity onPress={() => setSearch('')}>
-                <Ionicons name="close-circle" size={16} color="#94a3b8" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <TouchableOpacity style={styles.filterBtnGold} activeOpacity={0.8}>
-            <Ionicons name="options" size={18} color="#881337" />
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-
-      {/* Brand Filter Outside Header */}
+      {/* Brand Filter */}
       <View style={{ flexGrow: 0, flexShrink: 0 }}>
         <FlatList
           data={BRANDS}
@@ -131,6 +146,24 @@ export default function CarsScreen() {
           )}
         />
       </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#881337" />
+
+      {/* Sticky Animated Glass Top Bar */}
+      <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
+          <View style={styles.stickyBarOverlay} />
+          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+            <View style={styles.stickyTitleRow}>
+              <Text style={styles.stickyBarTitle}>Armada VIP</Text>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </Animated.View>
 
       {/* Cars List */}
       {loading ? (
@@ -139,11 +172,14 @@ export default function CarsScreen() {
           <Text style={styles.loadingText}>Memuat armada...</Text>
         </View>
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+          scrollEventThrottle={16}
+          ListHeaderComponent={renderHeader}
           renderItem={({ item }) => <CarCard car={item} />}
           contentContainerStyle={isSmall ? { paddingHorizontal: 12, paddingBottom: 20 } : styles.list}
           showsVerticalScrollIndicator={false}
@@ -155,22 +191,69 @@ export default function CarsScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  headerBg: {
+  stickyBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#881337',
+    zIndex: 999,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  stickyBarBg: {
     width: '100%',
+  },
+  stickyBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  stickyBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  stickyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stickyBarTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+  },
+  headerWrap: {
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
-    elevation: 12,
-    shadowColor: '#881337',
+    backgroundColor: '#881337',
+    marginBottom: 6,
+  },
+  headerBg: {
+    width: '100%',
+    paddingBottom: 8,
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#ff1a3c',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 14,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
   },
   headerBgImg: {
     borderBottomLeftRadius: 32,

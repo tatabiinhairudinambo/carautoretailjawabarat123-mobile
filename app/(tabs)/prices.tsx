@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ImageBackground,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -60,6 +61,20 @@ export default function PricesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const stickyBarOpacity = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -30],
+    extrapolate: 'clamp',
+  });
+
   useEffect(() => {
     loadPrices();
   }, []);
@@ -105,48 +120,57 @@ export default function PricesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#881337" />
 
-      {/* Fixed Hero Red Burgundy Glass Header */}
-      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
-        <View style={styles.headerOverlay} />
+      {/* Sticky Animated Glass Top Bar */}
+      <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
+          <View style={styles.stickyBarOverlay} />
+          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+            <View style={styles.stickyTitleRow}>
+              <Text style={styles.stickyBarTitle}>Tarif Sewa</Text>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </Animated.View>
 
-        {/* <View style={[styles.topHeaderRow, isSmall && { paddingHorizontal: 16, paddingTop: 12 }]}>
-
-          <View style={styles.notifBtnGlass}>
-            <Ionicons name="pricetag" size={18} color="#ffffff" />
-            <View style={styles.goldDot} />
-          </View>
-        </View> */}
-
-        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 16 }]}>
-          <Text style={styles.heroBigTitle}>Tarif Sewa Eksekutif</Text>
-          <Text style={styles.heroSubText}>Transparan, penawaran terbaik untuk sewa lepas kunci & pengemudi VIP</Text>
-        </View>
-      </ImageBackground>
-
-      {/* Fixed Category Filter Pills */}
-      <View style={{ flexGrow: 0, flexShrink: 0, marginTop: 14, marginBottom: 6 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
-          {['Semua', ...prices.map(p => p.category)].map((cat) => (
-            <TouchableOpacity
-              key={cat}
-              style={[styles.filterPill, selectedCat === cat && styles.filterPillActive]}
-              onPress={() => setSelectedCat(cat)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.filterPillText, selectedCat === cat && styles.filterPillTextActive]}>{cat}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#dc2626" colors={['#dc2626']} />}
-        contentContainerStyle={{ paddingBottom: 110, paddingTop: 4 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
       >
+        {/* Animated Hero Red Burgundy Glass Header */}
+        <Animated.View style={[styles.headerWrap, { transform: [{ translateY: headerTranslateY }] }]}>
+          <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+            <View style={styles.headerOverlay} />
+            <SafeAreaView edges={['top']} style={{ paddingBottom: 16 }}>
+              <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
+                <Text style={styles.heroBigTitle}>Tarif Sewa Eksekutif</Text>
+                <Text style={styles.heroSubText}>Transparan, penawaran terbaik untuk sewa lepas kunci & pengemudi VIP</Text>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+        </Animated.View>
+
+        {/* Category Filter Pills */}
+        <View style={{ flexGrow: 0, flexShrink: 0, marginTop: 14, marginBottom: 6 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
+            {['Semua', ...prices.map(p => p.category)].map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.filterPill, selectedCat === cat && styles.filterPillActive]}
+                onPress={() => setSelectedCat(cat)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.filterPillText, selectedCat === cat && styles.filterPillTextActive]}>{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Info Banner */}
         <View style={[styles.infoBanner, isSmall && { marginHorizontal: 12, padding: 12 }]}>
           <Ionicons name="information-circle" size={20} color="#fbbf24" style={{ marginTop: -2 }} />
@@ -240,8 +264,8 @@ export default function PricesScreen() {
         )}
 
         <View style={{ height: 24 }} />
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
@@ -342,6 +366,53 @@ const styles = StyleSheet.create({
   loadingText: { color: '#475569', marginTop: 12, fontSize: 14 },
 
   // Redesign Styles
+  stickyBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#881337',
+    zIndex: 999,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  stickyBarBg: {
+    width: '100%',
+  },
+  stickyBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  stickyBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  stickyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stickyBarTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+  },
+  headerWrap: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    backgroundColor: '#881337',
+    marginBottom: 6,
+  },
   headerBg: {
     width: '100%',
     borderBottomLeftRadius: 32,

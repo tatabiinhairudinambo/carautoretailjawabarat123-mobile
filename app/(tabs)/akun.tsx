@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Alert, ActivityIndicator, RefreshControl, Share, Image,
-  Modal, TextInput, ImageBackground, useWindowDimensions
+  Modal, TextInput, ImageBackground, useWindowDimensions, Animated
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -25,6 +25,20 @@ export default function AkunScreen() {
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [updatingAvatar, setUpdatingAvatar] = useState(false);
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const stickyBarOpacity = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -30],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     loadUser();
@@ -56,8 +70,7 @@ export default function AkunScreen() {
       // Save locally to AsyncStorage so it works instantly regardless of auth state
       await AsyncStorage.setItem('@vip_avatar_url', selectedUrl);
       setAvatarUrl(selectedUrl);
-      setAvatarModal(false);
-      setCustomPhotoUrl('');
+      setSheetVisible(false);
       Alert.alert('Berhasil', selectedUrl ? 'Foto profil berhasil diperbarui!' : 'Foto profil dihapus');
 
       // Try syncing with Supabase backend silently
@@ -123,25 +136,42 @@ export default function AkunScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#881337" />
 
-      {/* Fixed Hero Red Burgundy Glass Header */}
-      <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
-        <View style={styles.headerOverlay} />
+      {/* Sticky Animated Glass Top Bar */}
+      <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
+        <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
+          <View style={styles.stickyBarOverlay} />
+          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+            <View style={styles.stickyTitleRow}>
+              <Text style={styles.stickyBarTitle}>Profil</Text>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </Animated.View>
 
-        <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
-          <Text style={styles.locSubtitle}>MEMBER VIP RESMI</Text>
-          <Text style={styles.heroBigTitle}>Profil Eksekutif</Text>
-          <Text style={styles.heroSubText}>Kelola hak akses VIP, preferensi perjalanan & verifikasi akun Anda</Text>
-        </View>
-      </ImageBackground>
-
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" colors={['#ef4444']} />}
-        contentContainerStyle={{ paddingBottom: 110, paddingTop: 14 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
       >
+        {/* Animated Hero Red Burgundy Glass Header */}
+        <Animated.View style={[styles.headerWrap, { transform: [{ translateY: headerTranslateY }] }]}>
+          <ImageBackground source={require('../../assets/logo.jpg')} style={styles.headerBg} imageStyle={styles.headerBgImg}>
+            <View style={styles.headerOverlay} />
+            <SafeAreaView edges={['top']} style={{ paddingBottom: 22 }}>
+              <View style={[styles.headerHeroTextWrap, isSmall && { paddingHorizontal: 16, paddingBottom: 12 }]}>
+                <Text style={styles.locSubtitle}>MEMBER VIP RESMI</Text>
+                <Text style={styles.heroBigTitle}>Profil Eksekutif</Text>
+                <Text style={styles.heroSubText}>Kelola hak akses VIP, preferensi perjalanan & verifikasi akun Anda</Text>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+        </Animated.View>
+
         {loading ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator size="large" color="#dc2626" />
@@ -281,7 +311,7 @@ export default function AkunScreen() {
             <Text style={styles.footerText}>Car Auto Retail Jawa Barat v1.0</Text>
           </View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Sleek Action Sheet Modal */}
       {sheetVisible && (
@@ -313,20 +343,62 @@ export default function AkunScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  loadingWrap: { alignItems: 'center', justifyContent: 'center', padding: 60 },
-  headerBg: {
+  stickyBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#881337',
+    zIndex: 999,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  stickyBarBg: {
     width: '100%',
-    paddingTop: 24,
-    paddingBottom: 22,
+  },
+  stickyBarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+  },
+  stickyBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  stickyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stickyBarTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Arial',
+    fontWeight: '900',
+  },
+  headerWrap: {
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
+    backgroundColor: '#881337',
+  },
+  loadingWrap: { alignItems: 'center', justifyContent: 'center', padding: 60 },
+  headerBg: {
+    width: '100%',
+    paddingTop: 10,
     borderBottomWidth: 1.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
     shadowColor: '#ff1a3c',
@@ -345,7 +417,7 @@ const styles = StyleSheet.create({
   },
   headerHeroTextWrap: {
     paddingHorizontal: 20,
-    paddingBottom: 4,
+    paddingTop: 20,
     alignItems: 'center',
   },
   locSubtitle: {

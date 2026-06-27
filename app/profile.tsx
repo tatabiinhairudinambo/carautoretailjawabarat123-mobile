@@ -20,6 +20,7 @@ export default function ProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [sheetOptions, setSheetOptions] = useState<{ label: string; icon: 'camera-outline' | 'images-outline' | 'trash-outline'; onPress: () => void; color: string }[]>([]);
 
   useEffect(() => {
@@ -148,8 +149,11 @@ export default function ProfileScreen() {
     } catch {}
 
     setSaving(false);
-    Alert.alert('Berhasil', 'Profil berhasil diperbarui');
-    router.back();
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      router.back();
+    }, 2000);
   };
 
   if (loading) {
@@ -273,6 +277,41 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
+      )}
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <View style={StyleSheet.absoluteFillObject} pointerEvents="auto">
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.7)' }]} />
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <View style={{
+              backgroundColor: '#0a0f1e',
+              padding: 24,
+              borderRadius: 24,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: '#1e293b',
+              width: 280,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 15,
+            }}>
+              <View style={{
+                width: 64, height: 64, borderRadius: 32,
+                backgroundColor: 'rgba(34,197,94,0.1)',
+                alignItems: 'center', justifyContent: 'center',
+                marginBottom: 16,
+                borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)'
+              }}>
+                <Ionicons name="checkmark" size={32} color="#22c55e" />
+              </View>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: '#f1f5f9', marginBottom: 8, fontFamily: 'Arial' }}>Berhasil!</Text>
+              <Text style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', fontFamily: 'Arial' }}>Profil berhasil diperbarui</Text>
+            </View>
+          </View>
+        </View>
       )}
     </SafeAreaView>
   );

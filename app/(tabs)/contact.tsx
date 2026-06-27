@@ -113,11 +113,6 @@ export default function ContactScreen() {
                 </View>
                 <Text style={[styles.contactLabel, isSmall && { fontSize: 9 }]}>{item.label}</Text>
                 <Text style={[styles.contactValue, isSmall && { fontSize: 10, lineHeight: 15 }]}>{item.value}</Text>
-                {item.sub && (
-                  <View style={[styles.onlineBadge, { backgroundColor: item.color }, isSmall && { paddingHorizontal: 6, paddingVertical: 2 }]}>
-                    <Text style={[styles.onlineBadgeText, isSmall && { fontSize: 8 }]}>{item.sub}</Text>
-                  </View>
-                )}
               </TouchableOpacity>
               );
             })}
@@ -134,9 +129,6 @@ export default function ContactScreen() {
                 <Text style={[styles.waTitle, isSmall && { fontSize: 14 }]}>Chat via WhatsApp</Text>
                 <Text style={[styles.waSubtitle, isSmall && { fontSize: 11 }]}>Respon cepat, langsung terhubung!</Text>
               </View>
-            </View>
-            <View style={[styles.waArrowBg, isSmall && { width: 30, height: 30 }]}>
-              <Text style={[styles.waArrow, isSmall && { fontSize: 15 }]}>→</Text>
             </View>
           </TouchableOpacity>
 
