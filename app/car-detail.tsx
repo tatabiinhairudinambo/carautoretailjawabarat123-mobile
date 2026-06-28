@@ -36,10 +36,9 @@ export default function CarDetailScreen() {
     setLoading(false);
   };
 
-  const handleWhatsApp = () => {
+  const handlePayment = () => {
     if (!car) return;
-    const msg = `Halo, saya tertarik dengan ${car.name} (${car.year}). Apakah tersedia untuk disewa?`;
-    Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+    router.push(`/payment?id=${car.id}`);
   };
 
   const formatPrice = (price: number) =>
@@ -61,7 +60,6 @@ export default function CarDetailScreen() {
             <Ionicons name="chevron-back" size={22} color="#f1f5f9" />
           </TouchableOpacity>
           <Text style={styles.title}>Detail Armada</Text>
-          <View style={{ width: 40 }} />
         </View>
         <View style={styles.center}>
           <Text style={{ color: '#cbd5e1', fontSize: 14 }}>Armada tidak ditemukan</Text>
@@ -80,7 +78,6 @@ export default function CarDetailScreen() {
             <Ionicons name="chevron-back" size={22} color="#f1f5f9" />
           </TouchableOpacity>
           <Text style={styles.title}>Detail Armada</Text>
-          <View style={{ width: 40 }} />
         </View>
 
         {/* Image */}
@@ -91,7 +88,13 @@ export default function CarDetailScreen() {
 
         {/* Content */}
         <View style={styles.content}>
-          <Text style={[styles.name, isSmall && { fontSize: 20 }]}>{car.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={[styles.name, isSmall && { fontSize: 20 }, { marginBottom: 0 }]}>{car.name}</Text>
+            <View style={[styles.conditionChip, { marginBottom: 0 }]}>
+              <Ionicons name="checkmark-circle" size={16} color="#16a34a" />
+              <Text style={styles.conditionChipText}>Tersedia</Text>
+            </View>
+          </View>
           <Text style={[styles.brand, isSmall && { fontSize: 13 }]}>{car.brand}</Text>
 
           {/* Price Card */}
@@ -121,11 +124,6 @@ export default function CarDetailScreen() {
             </View>
           </View>
 
-          {/* Condition */}
-          <View style={styles.conditionChip}>
-            <Ionicons name="checkmark-circle" size={16} color="#16a34a" />
-            <Text style={styles.conditionChipText}>{car.condition === 'Baru' ? 'Bekas' : car.condition}</Text>
-          </View>
 
           {/* Features */}
           <View style={styles.featuresCard}>
@@ -140,12 +138,23 @@ export default function CarDetailScreen() {
             </View>
           </View>
 
+          {/* Important Notes */}
+          <View style={styles.noteCard}>
+            <View style={styles.noteHeader}>
+              <Ionicons name="information-circle" size={20} color="#fbbf24" />
+              <Text style={styles.noteTitle}>Catatan Penting</Text>
+            </View>
+            <Text style={styles.noteText}>• Harga sewa belum termasuk bensin, tol, dan parkir.</Text>
+            <Text style={styles.noteText}>• Penyewaan lepas kunci wajib melampirkan identitas diri (KTP/SIM).</Text>
+            <Text style={styles.noteText}>• Pembatalan pada hari H akan dikenakan potongan 50%.</Text>
+          </View>
+
           {/* Booking CTA */}
-          <TouchableOpacity style={styles.waButton} onPress={handleWhatsApp} activeOpacity={0.85}>
-            <Ionicons name="logo-whatsapp" size={22} color="#fff" />
+          <TouchableOpacity style={styles.payButton} onPress={handlePayment} activeOpacity={0.85}>
+            <Ionicons name="card-outline" size={22} color="#0a0f1e" />
             <View>
-              <Text style={styles.waButtonTitle}>Pesan Sekarang</Text>
-              <Text style={styles.waButtonSub}>via WhatsApp</Text>
+              <Text style={styles.payButtonTitle}>Pesan Sekarang</Text>
+              <Text style={styles.payButtonSub}>Lanjut ke Pembayaran</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -159,12 +168,12 @@ export default function CarDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
     borderBottomWidth: 1, borderBottomColor: '#1e293b',
   },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#1e293b', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '900', color: '#f1f5f9' },
+  title: { fontSize: 18, fontWeight: '900', color: '#fbbf24', marginLeft: 14 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   imageWrap: { position: 'relative', height: 260 },
@@ -179,16 +188,16 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(22,163,74,0.25)', marginBottom: 20,
   },
   conditionChipText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-  name: { fontSize: 24, fontWeight: '900', color: '#f1f5f9', marginBottom: 4 },
+  name: { fontSize: 24, fontWeight: '900', color: '#ef4444', marginBottom: 4 },
   brand: { fontSize: 14, color: '#cbd5e1', fontWeight: '600', marginBottom: 20 },
 
   priceCard: {
-    backgroundColor: 'rgba(220,38,38,0.08)', borderRadius: 16,
-    padding: 18, borderWidth: 1, borderColor: 'rgba(220,38,38,0.2)',
+    backgroundColor: 'rgba(251,191,36,0.1)', borderRadius: 16,
+    padding: 18, borderWidth: 1, borderColor: 'rgba(251,191,36,0.3)',
     marginBottom: 20, alignItems: 'center',
   },
   priceLabel: { fontSize: 12, color: '#cbd5e1', fontWeight: '600', marginBottom: 6 },
-  price: { fontSize: 26, fontWeight: '900', color: '#dc2626' },
+  price: { fontSize: 26, fontWeight: '900', color: '#fbbf24' },
 
   specsRow: {
     flexDirection: 'row', backgroundColor: '#1e293b', borderRadius: 16,
@@ -208,11 +217,20 @@ const styles = StyleSheet.create({
   featureItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   featureText: { fontSize: 13, color: '#cbd5e1', fontWeight: '500' },
 
-  waButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
-    backgroundColor: '#16a34a', borderRadius: 18, paddingVertical: 18,
-    shadowColor: '#16a34a', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
+  noteCard: {
+    backgroundColor: 'rgba(251,191,36,0.08)', borderRadius: 16,
+    padding: 16, borderWidth: 1, borderColor: 'rgba(251,191,36,0.2)',
+    marginBottom: 24,
   },
-  waButtonTitle: { color: '#fff', fontSize: 16, fontWeight: '800' },
-  waButtonSub: { color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: '600', marginTop: 1 },
+  noteHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  noteTitle: { fontSize: 14, fontWeight: '800', color: '#fbbf24' },
+  noteText: { fontSize: 12, color: '#cbd5e1', lineHeight: 20, marginBottom: 4 },
+
+  payButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
+    backgroundColor: '#fbbf24', borderRadius: 18, paddingVertical: 18,
+    shadowColor: '#fbbf24', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
+  },
+  payButtonTitle: { color: '#0a0f1e', fontSize: 16, fontWeight: '800' },
+  payButtonSub: { color: 'rgba(10,15,30,0.7)', fontSize: 11, fontWeight: '700', marginTop: 1 },
 });

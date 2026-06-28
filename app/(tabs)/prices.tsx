@@ -121,7 +121,7 @@ export default function PricesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#881337" />
+      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
 
       {/* Sticky Animated Glass Top Bar */}
       <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.15)',
@@ -387,12 +387,12 @@ const styles = StyleSheet.create({
   },
   stickyBarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+    backgroundColor: 'rgba(10, 15, 30, 0.88)',
   },
   stickyBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stickyBarTitle: {
-    color: '#fff',
+    color: '#fbbf24',
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: '900',
@@ -410,8 +410,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
-    backgroundColor: '#881337',
-    marginBottom: 6,
+    backgroundColor: '#0a0f1e',
+    marginBottom: 16,
   },
   headerBg: {
     width: '100%',
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 32,
     overflow: 'hidden',
     elevation: 12,
-    shadowColor: '#881337',
+    shadowColor: '#0a0f1e',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.5,
     shadowRadius: 16,
@@ -430,11 +430,11 @@ const styles = StyleSheet.create({
   },
   headerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(88, 19, 55, 0.92)',
+    backgroundColor: 'rgba(10, 15, 30, 0.92)',
   },
   topHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 22,
     paddingTop: 16,
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   },
   heroSubText: {
     fontSize: 13,
-    color: '#fecdd3',
+    color: '#fbbf24',
     marginTop: 4,
     fontFamily: 'Arial',
   },

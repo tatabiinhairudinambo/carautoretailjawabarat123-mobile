@@ -188,13 +188,18 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#881337" />
+      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
 
       {/* Sticky Animated Glass Top Bar */}
       <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
         <ImageBackground source={require('../../assets/logo.jpg')} style={styles.stickyBarBg}>
           <View style={styles.stickyBarOverlay} />
-          <SafeAreaView edges={['top']} style={styles.stickyBarContent}>
+          <SafeAreaView edges={['top']} style={[styles.stickyBarContent, { justifyContent: 'space-between' }]}>
+            <View style={styles.stickyTitleRow}>
+              {/* <Image source={require('../../assets/logo.jpg')} style={styles.stickyMiniLogo} resizeMode="cover" /> */}
+              <Text style={styles.stickyBarTitle}>Car Auto Retail</Text>
+            </View>
+
             <TouchableOpacity style={styles.avatarWrapSmall} onPress={() => router.push('/akun')}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
@@ -203,15 +208,6 @@ export default function HomeScreen() {
                   <Ionicons name="person" size={16} color="#fff" />
                 </View>
               )}
-            </TouchableOpacity>
-
-            <View style={styles.stickyTitleRow}>
-              {/* <Image source={require('../../assets/logo.jpg')} style={styles.stickyMiniLogo} resizeMode="cover" /> */}
-              <Text style={styles.stickyBarTitle}>Car Auto Retail</Text>
-            </View>
-
-            <TouchableOpacity style={styles.bellBtnSmall} onPress={() => router.push('/history')}>
-              <Ionicons name="notifications" size={18} color="#fff" />
             </TouchableOpacity>
           </SafeAreaView>
         </ImageBackground>
@@ -491,7 +487,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.15)',
@@ -507,14 +503,14 @@ const styles = StyleSheet.create({
   },
   stickyBarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+    backgroundColor: 'rgba(10, 15, 30, 0.88)',
   },
   stickyBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 14,
   },
   stickyTitleRow: {
     flexDirection: 'row',
@@ -529,7 +525,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.4)',
   },
   stickyBarTitle: {
-    color: '#fff',
+    color: '#fbbf24',
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: '900',
@@ -541,7 +537,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.4)',
     overflow: 'hidden',
-    backgroundColor: '#9f1239',
+    backgroundColor: '#16a34a',
   },
   bellBtnSmall: {
     width: 32,
@@ -555,7 +551,13 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
     overflow: 'hidden',
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
+    marginBottom: 20,
+    shadowColor: '#0a0f1e',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 15,
   },
   topHeaderBg: {
     width: '100%',
@@ -566,7 +568,7 @@ const styles = StyleSheet.create({
   },
   topHeaderOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(136, 19, 55, 0.82)',
+    backgroundColor: 'rgba(10, 15, 30, 0.85)',
   },
   topHeaderContent: {
     paddingHorizontal: 20,
@@ -585,7 +587,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.4)',
     overflow: 'hidden',
-    backgroundColor: '#9f1239',
+    backgroundColor: '#16a34a',
   },
   avatarImg: {
     width: '100%',
@@ -610,7 +612,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   balanceLabel: {
-    color: '#fecdd3',
+    color: '#fbbf24',
     fontSize: 13,
     fontFamily: 'Arial',
     fontWeight: '600',
@@ -905,7 +907,7 @@ const styles = StyleSheet.create({
   },
   pilotLocLabel: {
     fontSize: 12,
-    color: '#fecdd3',
+    color: '#fbbf24',
     fontFamily: 'Arial',
     fontWeight: '600',
   },

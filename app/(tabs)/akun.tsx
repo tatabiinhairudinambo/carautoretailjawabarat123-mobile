@@ -137,7 +137,7 @@ export default function AkunScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#881337" />
+      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
 
       {/* Sticky Animated Glass Top Bar */}
       <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.15)',
@@ -370,12 +370,12 @@ const styles = StyleSheet.create({
   },
   stickyBarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+    backgroundColor: 'rgba(10, 15, 30, 0.88)',
   },
   stickyBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
@@ -384,16 +384,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stickyBarTitle: {
-    color: '#fff',
+    color: '#fbbf24',
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: '900',
   },
   headerWrap: {
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
     overflow: 'hidden',
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
+    marginBottom: 20,
   },
   loadingWrap: { alignItems: 'center', justifyContent: 'center', padding: 60 },
   headerBg: {
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderBottomWidth: 1.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#ff1a3c',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
@@ -413,17 +414,17 @@ const styles = StyleSheet.create({
   },
   headerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(88, 19, 55, 0.92)',
+    backgroundColor: '#0a0f1e',
   },
   headerHeroTextWrap: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   locSubtitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#fca5a5',
+    color: '#fbbf24',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginBottom: 6,
@@ -453,11 +454,11 @@ const styles = StyleSheet.create({
   profileRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   avatarWrap: {
     width: 68, height: 68, borderRadius: 34, backgroundColor: '#334155',
-    borderWidth: 2, borderColor: '#dc2626', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: '#16a34a', alignItems: 'center', justifyContent: 'center',
   },
   avatarImage: { width: 64, height: 64, borderRadius: 32 },
   cameraBadge: {
-    position: 'absolute', bottom: -2, right: -2, width: 24, height: 24, borderRadius: 12, backgroundColor: '#dc2626',
+    position: 'absolute', bottom: -2, right: -2, width: 24, height: 24, borderRadius: 12, backgroundColor: '#16a34a',
     borderWidth: 2, borderColor: '#1e293b', alignItems: 'center', justifyContent: 'center',
   },
   profileInfo: { flex: 1 },

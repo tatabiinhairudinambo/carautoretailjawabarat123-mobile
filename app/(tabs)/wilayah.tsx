@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const WHATSAPP_NUMBER = '6281234567890';
@@ -16,47 +17,48 @@ const regions = [
     name: 'Bandung Raya',
     desc: 'Kota Bandung, Cimahi, Kab. Bandung, Bandung Barat',
     badge: 'Layanan Utama',
-    image: 'https://images.unsplash.com/photo-1549473889-14f410d83298?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/gedung,sate?lock=113',
   },
   {
     icon: 'map',
     name: 'Jakarta & Jabodetabek',
     desc: 'Jakarta, Bekasi, Depok, Tangerang, Bogor',
     badge: 'Express 24 Jam',
-    image: 'https://images.unsplash.com/photo-1555899434-94d1368aa7af?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/jakarta,monas?lock=105',
   },
   {
     icon: 'trail-sign',
     name: 'Priangan Timur',
     desc: 'Garut, Tasikmalaya, Ciamis, Pangandaran',
     badge: 'Unit Ready',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/tea,plantation,indonesia?lock=33',
   },
   {
     icon: 'water',
     name: 'Cirebon Raya',
     desc: 'Cirebon, Indramayu, Majalengka, Kuningan',
     badge: 'Antar Jemput',
-    image: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/cirebon,mosque?lock=44',
   },
   {
     icon: 'leaf',
     name: 'Sukabumi Raya',
     desc: 'Sukabumi, Cianjur',
     badge: 'Fast Booking',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/waterfall,sukabumi?lock=55',
   },
   {
     icon: 'pin',
     name: 'Karawang & Purwakarta',
     desc: 'Karawang, Purwakarta, Subang',
     badge: 'Support 24/7',
-    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=600&q=80',
+    image: 'https://loremflickr.com/600/400/dam,indonesia?lock=66',
   },
 ];
 
 export default function WilayahScreen() {
   const { width: SCREEN_W } = useWindowDimensions();
+  const router = useRouter();
   const isSmall = SCREEN_W < 375;
   const [refreshing, setRefreshing] = useState(false);
 
@@ -80,13 +82,12 @@ export default function WilayahScreen() {
   };
 
   const handleBookRegion = (regionName: string) => {
-    const msg = `Halo Car Auto Retail, saya ingin memesan layanan rental mobil untuk area ${regionName}.`;
-    Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+    router.push('/cars');
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#881337" />
+      <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
 
       {/* Sticky Animated Glass Top Bar */}
       <Animated.View style={[styles.stickyBar, { opacity: stickyBarOpacity }]}>
@@ -155,9 +156,9 @@ export default function WilayahScreen() {
                 <View style={styles.cardContent}>
                   <View style={styles.cardHeader}>
                     <View style={styles.iconBg}>
-                      <Ionicons name={r.icon as any} size={20} color="#ef4444" />
+                      <Ionicons name={r.icon as any} size={20} color="#fbbf24" />
                     </View>
-                    <Ionicons name="arrow-forward" size={18} color="#ef4444" />
+                    <Ionicons name="arrow-forward" size={18} color="#fbbf24" />
                   </View>
 
                   <Text style={styles.cardName} numberOfLines={1}>{r.name}</Text>
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.15)',
@@ -201,12 +202,12 @@ const styles = StyleSheet.create({
   },
   stickyBarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(136, 19, 55, 0.88)',
+    backgroundColor: 'rgba(10, 15, 30, 0.88)',
   },
   stickyBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stickyBarTitle: {
-    color: '#fff',
+    color: '#fbbf24',
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: '900',
@@ -224,14 +225,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
-    backgroundColor: '#881337',
+    backgroundColor: '#0a0f1e',
+    marginBottom: 16,
   },
   headerBg: {
     width: '100%',
     paddingTop: 10,
     borderBottomWidth: 1.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#ff1a3c',
+    shadowColor: '#0a0f1e',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
@@ -243,17 +245,17 @@ const styles = StyleSheet.create({
   },
   headerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(88, 19, 55, 0.92)',
+    backgroundColor: 'rgba(10, 15, 30, 0.92)',
   },
   headerHeroTextWrap: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   locSubtitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#fca5a5',
+    color: '#fbbf24',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginBottom: 6,
@@ -295,10 +297,10 @@ const styles = StyleSheet.create({
   },
   cardContent: { padding: 16 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  iconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(239,68,68,0.15)' },
+  iconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(251,191,36,0.15)' },
   cardName: { fontSize: 16, fontWeight: '800', color: '#ffffff', marginBottom: 6, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
   cardDesc: { fontSize: 12, color: '#ffffff', lineHeight: 18, marginBottom: 14, minHeight: 36, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
-  badgeWrap: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.3)' },
-  badgeText: { fontSize: 10, fontWeight: '700', color: '#ffffff' },
+  badgeWrap: { alignSelf: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.3)' },
+  badgeText: { fontSize: 10, fontWeight: '900', color: '#fbbf24' },
 });
 

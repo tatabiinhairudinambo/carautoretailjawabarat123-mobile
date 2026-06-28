@@ -47,9 +47,9 @@ export default function CarCard({ car }: CarCardProps) {
     ? (BRAND_FALLBACK_IMAGES[car?.brand] || BRAND_FALLBACK_IMAGES['Toyota'])
     : car.image;
 
-  const handleWhatsApp = () => {
-    const msg = `Halo, saya tertarik dengan ${car?.name || 'Mobil'} (${car?.year || ''}). Apakah tersedia untuk disewa?`;
-    Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+  const handlePayment = (e: any) => {
+    e.stopPropagation(); // prevent card click
+    router.push(`/payment?id=${car.id}`);
   };
 
   const formatPrice = (price: number) =>
@@ -112,10 +112,10 @@ export default function CarCard({ car }: CarCardProps) {
             <Text style={styles.priceLabel}>Sewa per hari</Text>
             <Text style={[styles.price, isSmall && { fontSize: 16 }]}>Rp {formatPrice(car.price)}</Text>
           </View>
-          <TouchableOpacity style={[styles.waButton, isSmall && { paddingHorizontal: 16, paddingVertical: 10 }]} onPress={handleWhatsApp} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.payButton, isSmall && { paddingHorizontal: 16, paddingVertical: 10 }]} onPress={handlePayment} activeOpacity={0.8}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Ionicons name="logo-whatsapp" size={isSmall ? 14 : 16} color="#fff" />
-              <Text style={[styles.waText, isSmall && { fontSize: 12 }]}>Pesan</Text>
+              <Ionicons name="card-outline" size={isSmall ? 14 : 16} color="#0a0f1e" />
+              <Text style={[styles.payText, isSmall && { fontSize: 12 }]}>Pesan</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -185,9 +185,20 @@ const styles = StyleSheet.create({
   },
   priceLabel: { fontSize: 11, color: '#cbd5e1', marginBottom: 3, fontWeight: '600' },
   price: { fontSize: 18, fontWeight: '900', color: '#dc2626' },
-  waButton: {
-    backgroundColor: '#16a34a', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
-    shadowColor: '#16a34a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
+  payButton: {
+    backgroundColor: '#fbbf24',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 14,
+    shadowColor: '#fbbf24',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  waText: { color: '#fff', fontWeight: '800', fontSize: 13 },
+  payText: {
+    color: '#0a0f1e',
+    fontWeight: '800',
+    fontSize: 14,
+  },
 });
