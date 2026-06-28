@@ -252,7 +252,7 @@ export default function AkunScreen() {
                     await Share.share({
                       message: 'Sewa mobil terpercaya di Jawa Barat — Car Auto Retail!\n\nDownload sekarang: https://carautoretail.app',
                     });
-                  } catch {}
+                  } catch { }
                 }}
               >
                 <View style={styles.menuLeft}>

@@ -99,7 +99,7 @@ export default function CarDetailScreen() {
 
           {/* Price Card */}
           <View style={styles.priceCard}>
-            <Text style={styles.priceLabel}>Harga Sewa per Hari</Text>
+            <Text style={styles.priceLabel}>Tarif Kendaraan</Text>
             <Text style={[styles.price, isSmall && { fontSize: 22 }]}>{formatPrice(car.price)}</Text>
           </View>
 
