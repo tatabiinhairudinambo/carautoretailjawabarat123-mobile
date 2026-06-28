@@ -24,11 +24,21 @@ import AnimatedCard from '../../components/AnimatedCard';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
+const LOCATIONS = [
+  'Jawa Barat, ID',
+  'Bandung Raya',
+  'Jakarta & Jabodetabek',
+  'Priangan Timur',
+  'Cirebon Raya',
+  'Sukabumi Raya',
+  'Karawang & Purwakarta'
+];
+
 const quickActions = [
-  { icon: 'wallet-outline', label: 'Booking', route: '/cars' },
-  { icon: 'paper-plane-outline', label: 'WhatsApp', action: 'wa' },
-  { icon: 'pricetag-outline', label: 'Promo', action: 'promo' },
-  { icon: 'time-outline', label: 'Riwayat', route: '/history' },
+  { icon: 'wallet-outline', label: 'Booking', route: '/cars', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' },
+  { icon: 'paper-plane-outline', label: 'WhatsApp', action: 'wa', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)' },
+  { icon: 'pricetag-outline', label: 'Promo', action: 'promo', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
+  { icon: 'time-outline', label: 'Riwayat', route: '/history', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
 ];
 
 const paymentList = [
@@ -81,6 +91,8 @@ export default function HomeScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('Member');
   const [promoCars, setPromoCars] = useState<any[]>(PROMO_CARS_FALLBACK);
+  const [locModalVisible, setLocModalVisible] = useState(false);
+  const [selectedLoc, setSelectedLoc] = useState(LOCATIONS[0]);
   const isSmall = SCREEN_W < 375;
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -231,13 +243,13 @@ export default function HomeScreen() {
             <SafeAreaView edges={['top']} style={styles.topHeaderContent}>
               <View style={styles.pilotNavRow}>
                 <View style={styles.pilotLeftGroup}>
-                  <TouchableOpacity style={styles.pilotPinCircle} activeOpacity={0.8} onPress={() => router.push('/wilayah')}>
+                  <TouchableOpacity style={styles.pilotPinCircle} activeOpacity={0.8} onPress={() => setLocModalVisible(true)}>
                     <Ionicons name="location" size={20} color="#ffffff" />
                   </TouchableOpacity>
                   <View style={{ marginLeft: 12 }}>
                     <Text style={styles.pilotLocLabel}>Lokasi Pilihan</Text>
-                    <TouchableOpacity style={styles.pilotLocValRow} onPress={() => router.push('/wilayah')} activeOpacity={0.8}>
-                      <Text style={styles.pilotLocValText}>Jawa Barat, ID</Text>
+                    <TouchableOpacity style={styles.pilotLocValRow} onPress={() => setLocModalVisible(true)} activeOpacity={0.8}>
+                      <Text style={styles.pilotLocValText}>{selectedLoc}</Text>
                       <Ionicons name="chevron-down" size={16} color="#fbbf24" style={{ marginLeft: 4 }} />
                     </TouchableOpacity>
                   </View>
@@ -274,22 +286,20 @@ export default function HomeScreen() {
 
           {/* Hero Featured Card (Top Chart of the Day) */}
           <View style={styles.heroPromoBox}>
-            <ImageBackground source={require('../../assets/logo.jpg')} style={styles.heroPromoBg} imageStyle={{ borderRadius: 24 }}>
-              <View style={styles.heroPromoOverlay} />
+            <View style={styles.heroPromoBg}>
               <View style={styles.heroPromoInner}>
                 <View style={{ flex: 1, paddingRight: 10 }}>
                   <Text style={styles.heroPromoChartText}>TOP CHART OF THE DAY</Text>
                   <Text style={styles.heroPromoBigTitle}>Sewa Mobil VIP & Lepas Kunci Jabar</Text>
                   <TouchableOpacity style={styles.yellowMockupBtn} onPress={claimPromo} activeOpacity={0.8}>
-                    <Ionicons name="play" size={16} color="#0f172a" style={{ marginRight: 6 }} />
                     <Text style={styles.yellowMockupBtnText}>Pesan Sekarang</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.heroCarFloatWrap}>
-                  <Ionicons name="car-sport" size={isSmall ? 68 : 82} color="#ffffff" style={styles.carNeonGlow} />
+                  <Ionicons name="diamond" size={isSmall ? 56 : 64} color="#fbbf24" style={styles.carNeonGlow} />
                 </View>
               </View>
-            </ImageBackground>
+            </View>
           </View>
 
           {/* Floating Quick Action Row */}
@@ -302,7 +312,7 @@ export default function HomeScreen() {
                 activeOpacity={0.75}
               >
                 <View style={styles.quickActionIconCircle}>
-                  <Ionicons name={qa.icon as any} size={22} color="#ef4444" />
+                  <Ionicons name={qa.icon as any} size={22} color={qa.color} />
                 </View>
                 <Text style={styles.quickActionText}>{qa.label}</Text>
               </TouchableOpacity>
@@ -337,9 +347,9 @@ export default function HomeScreen() {
           {/* Identify Closest Vehicle Map Banner */}
           <TouchableOpacity style={styles.mapBannerCard} onPress={() => router.push('/wilayah')} activeOpacity={0.85}>
             <View style={styles.mapGraphicBox}>
-              <Ionicons name="map" size={42} color="#3b82f6" />
+              <Ionicons name="map" size={42} color="rgba(255, 255, 255, 0.6)" />
               <View style={styles.mapPinOverlay}>
-                <Ionicons name="location" size={22} color="#ef4444" />
+                <Ionicons name="location" size={22} color="#fbbf24" />
               </View>
             </View>
             <View style={{ flex: 1, paddingHorizontal: 14 }}>
@@ -347,7 +357,7 @@ export default function HomeScreen() {
               <Text style={styles.mapBannerSub}>Deteksi armada terdekat di Jawa Barat</Text>
             </View>
             <View style={styles.mapArrowCircle}>
-              <Ionicons name="chevron-forward" size={18} color="#ffffff" />
+              <Ionicons name="chevron-forward" size={18} color="#fbbf24" />
             </View>
           </TouchableOpacity>
 
@@ -472,6 +482,45 @@ export default function HomeScreen() {
           </View>
         </View>
       </Animated.ScrollView>
+
+      {/* Location Selection Overlay (Custom Modal) */}
+      {locModalVisible && (
+        <View style={[StyleSheet.absoluteFill, { zIndex: 9999, elevation: 9999 }]}>
+          <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setLocModalVisible(false)}
+          />
+          <View style={[styles.modalContainer, { position: 'absolute', bottom: 0, left: 0, right: 0 }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Pilih Lokasi Layanan</Text>
+              <TouchableOpacity onPress={() => setLocModalVisible(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={24} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+              {LOCATIONS.map((loc, i) => {
+                const isSelected = loc === selectedLoc;
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    activeOpacity={0.7}
+                    style={[styles.modalLocItem, isSelected && styles.modalLocItemActive]}
+                    onPress={() => {
+                      setSelectedLoc(loc);
+                      setLocModalVisible(false);
+                    }}
+                  >
+                    <Ionicons name="location" size={20} color={isSelected ? '#fbbf24' : '#64748b'} />
+                    <Text style={[styles.modalLocText, isSelected && styles.modalLocTextActive]}>{loc}</Text>
+                    {isSelected && <Ionicons name="checkmark-circle" size={20} color="#fbbf24" style={{ marginLeft: 'auto' }} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -490,7 +539,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -659,7 +708,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -725,7 +774,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   seeMoreText: {
-    color: '#ef4444',
+    color: '#fbbf24',
     fontSize: 13,
     fontFamily: 'Arial',
     fontWeight: '700',
@@ -966,7 +1015,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderRadius: 24,
     elevation: 8,
-    shadowColor: '#881337',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
@@ -974,11 +1023,10 @@ const styles = StyleSheet.create({
   heroPromoBg: {
     width: '100%',
     borderRadius: 24,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#1e293b',
     overflow: 'hidden',
-  },
-  heroPromoOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(76, 29, 149, 0.92)',
   },
   heroPromoInner: {
     flexDirection: 'row',
@@ -987,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   heroPromoChartText: {
     fontSize: 11,
-    color: '#e9d5ff',
+    color: '#fbbf24',
     fontWeight: '800',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -1026,8 +1074,9 @@ const styles = StyleSheet.create({
     marginRight: -10,
   },
   carNeonGlow: {
-    textShadowColor: '#ffffff',
-    textShadowRadius: 15,
+    textShadowColor: 'rgba(251, 191, 36, 0.3)',
+    textShadowRadius: 10,
+    opacity: 0.9,
   },
   quickActionSheetRow: {
     flexDirection: 'row',
@@ -1104,7 +1153,7 @@ const styles = StyleSheet.create({
   mapBannerTitle: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#ffffff',
+    color: '#fbbf24',
     fontFamily: 'Arial',
   },
   mapBannerSub: {
@@ -1117,7 +1166,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#6d28d9',
+    backgroundColor: 'rgba(251, 191, 36, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1144,4 +1193,14 @@ const styles = StyleSheet.create({
   testimonialContainer: {
     marginTop: 10,
   },
+
+  // Modal Loc
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(10, 15, 30, 0.8)', justifyContent: 'flex-end' },
+  modalContainer: { backgroundColor: '#1e293b', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '80%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { color: '#f1f5f9', fontSize: 16, fontWeight: '800' },
+  modalLocItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#334155' },
+  modalLocItemActive: { backgroundColor: 'rgba(251,191,36,0.05)', paddingHorizontal: 12, borderRadius: 12, borderBottomWidth: 0, marginTop: 4, marginBottom: 4 },
+  modalLocText: { color: '#cbd5e1', fontSize: 15, fontWeight: '600' },
+  modalLocTextActive: { color: '#fbbf24', fontWeight: '800' },
 });

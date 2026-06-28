@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: 'transparent',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.22)',
+    borderTopColor: 'rgba(255,255,255,0.45)',
     height: Platform.OS === 'ios' ? 88 : 68,
     paddingHorizontal: 8,
     paddingTop: 8,

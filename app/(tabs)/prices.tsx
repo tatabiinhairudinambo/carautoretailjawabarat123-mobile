@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0f1e',
     zIndex: 999,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -415,6 +415,8 @@ const styles = StyleSheet.create({
   },
   headerBg: {
     width: '100%',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
