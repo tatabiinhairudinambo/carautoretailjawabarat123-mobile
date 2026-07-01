@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   Animated,
   ImageBackground,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -97,6 +98,7 @@ export default function HomeScreen() {
   const [selectedLoc, setSelectedLoc] = useState(LOCATIONS[0]);
   const [isLocating, setIsLocating] = useState(false);
   const isSmall = SCREEN_W < 375;
+  const [navigating, setNavigating] = useState(false);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const promoRef = React.useRef<FlatList>(null);
@@ -245,8 +247,22 @@ export default function HomeScreen() {
   const handleQuickAction = (item: any) => {
     if (item.action === 'wa') openWhatsApp();
     else if (item.action === 'promo') claimPromo();
-    else if (item.route) router.push(item.route);
+    else if (item.route) {
+      setNavigating(true);
+      setTimeout(() => {
+        router.push(item.route);
+        setTimeout(() => setNavigating(false), 400);
+      }, 300);
+    }
   };
+
+  const navigateTo = useCallback((route: string) => {
+    setNavigating(true);
+    setTimeout(() => {
+      router.push(route);
+      setTimeout(() => setNavigating(false), 400);
+    }, 300);
+  }, [router]);
 
   return (
     <View style={styles.container}>
@@ -329,7 +345,7 @@ export default function HomeScreen() {
           <View style={styles.dragHandlePill} />
 
           {/* Search Pill */}
-          <TouchableOpacity style={styles.mockupSearchPill} onPress={() => router.push('/cars')} activeOpacity={0.9}>
+          <TouchableOpacity style={styles.mockupSearchPill} onPress={() => navigateTo('/cars')} activeOpacity={0.9}>
             <Ionicons name="search" size={20} color="#64748b" style={{ marginRight: 10 }} />
             <Text style={styles.mockupSearchText}>Cari kendaraan impian Anda...</Text>
           </TouchableOpacity>
@@ -372,7 +388,7 @@ export default function HomeScreen() {
           {/* Top Brands Grid */}
           <View style={styles.brandsHeaderRow}>
             <Text style={styles.sectionTitle}>Top Brands</Text>
-            <TouchableOpacity onPress={() => router.push('/cars')}>
+            <TouchableOpacity onPress={() => navigateTo('/cars')}>
               <Text style={styles.seeMoreText}>Lihat Semua</Text>
             </TouchableOpacity>
           </View>
@@ -382,7 +398,7 @@ export default function HomeScreen() {
                 key={item.label}
                 delay={index * 50}
                 style={[styles.brandChip, { width: isSmall ? '23%' : '22%' }]}
-                onPress={() => router.push('/cars')}
+                onPress={() => navigateTo('/cars')}
               >
                 <View style={styles.brandIconBox}>
                   <Ionicons name={item.icon as any} size={26} color={item.color} />
@@ -395,7 +411,7 @@ export default function HomeScreen() {
           </View>
 
           {/* Identify Closest Vehicle Map Banner */}
-          <TouchableOpacity style={styles.mapBannerCard} onPress={() => router.push('/wilayah')} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.mapBannerCard} onPress={() => navigateTo('/wilayah')} activeOpacity={0.85}>
             <View style={styles.mapGraphicBox}>
               <Ionicons name="map" size={42} color="rgba(255, 255, 255, 0.6)" />
               <View style={styles.mapPinOverlay}>
@@ -414,7 +430,7 @@ export default function HomeScreen() {
           {/* Promo & Penawaran */}
           <View style={styles.promoHeaderRow}>
             <Text style={styles.sectionTitle}>Armada Pilihan Terpopuler</Text>
-            <TouchableOpacity onPress={() => router.push('/cars')} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => navigateTo('/cars')} activeOpacity={0.7}>
               <Text style={styles.seeMoreText}>Lihat Semua</Text>
             </TouchableOpacity>
           </View>
@@ -463,7 +479,7 @@ export default function HomeScreen() {
                 <TouchableOpacity
                   activeOpacity={0.85}
                   style={[styles.promoSliderCard, { width: isSmall ? 230 : 260 }]}
-                  onPress={() => router.push('/cars')}
+                  onPress={() => navigateTo('/cars')}
                 >
                   <View style={styles.promoImgBox}>
                     <Image
@@ -532,6 +548,16 @@ export default function HomeScreen() {
           </View>
         </View>
       </Animated.ScrollView>
+
+      {/* Loading Overlay */}
+      {navigating && (
+        <View style={[StyleSheet.absoluteFill, styles.navLoadingOverlay]}>
+          <View style={styles.navLoadingBox}>
+            <ActivityIndicator size="large" color="#dc2626" />
+            <Text style={styles.navLoadingText}>Memuat...</Text>
+          </View>
+        </View>
+      )}
 
       {/* Location Selection Overlay (Custom Modal) */}
       {locModalVisible && (
@@ -1270,4 +1296,32 @@ const styles = StyleSheet.create({
   modalLocItemActive: { backgroundColor: 'rgba(251,191,36,0.05)', paddingHorizontal: 12, borderRadius: 12, borderBottomWidth: 0, marginTop: 4, marginBottom: 4 },
   modalLocText: { color: '#cbd5e1', fontSize: 15, fontWeight: '600' },
   modalLocTextActive: { color: '#fbbf24', fontWeight: '800' },
+
+  navLoadingOverlay: {
+    backgroundColor: 'rgba(10, 15, 30, 0.75)',
+    zIndex: 99999,
+    elevation: 99999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLoadingBox: {
+    backgroundColor: '#1e293b',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  navLoadingText: {
+    color: '#cbd5e1',
+    marginTop: 14,
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });
