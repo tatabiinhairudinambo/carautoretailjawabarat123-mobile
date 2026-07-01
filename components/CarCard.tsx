@@ -93,9 +93,9 @@ export default function CarCard({ car }: CarCardProps) {
         </View>
 
         <View style={styles.chipsRow}>
-          <View style={[styles.chip, car.condition === 'Baru' ? styles.chipNew : styles.chipUsed]}>
-            <Text style={[styles.chipText, car.condition === 'Baru' ? styles.chipNewText : styles.chipUsedText]}>
-              {car.condition === 'Baru' ? 'Baru' : 'Bekas'}
+          <View style={[styles.chip, car.condition === 'Tersedia' ? styles.chipAvailable : styles.chipUnavailable]}>
+            <Text style={[styles.chipText, car.condition === 'Tersedia' ? styles.chipAvailableText : styles.chipUnavailableText]}>
+              {car.condition === 'Tersedia' ? 'Tersedia' : car.condition || 'Tidak Tersedia'}
             </Text>
           </View>
           <View style={styles.featuresRow}>
@@ -164,11 +164,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16,
   },
   chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
-  chipNew: { backgroundColor: 'rgba(22,163,74,0.12)', borderColor: 'rgba(22,163,74,0.25)' },
-  chipUsed: { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' },
+  chipAvailable: { backgroundColor: 'rgba(22,163,74,0.12)', borderColor: 'rgba(22,163,74,0.25)' },
+  chipUnavailable: { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' },
   chipText: { fontSize: 11, fontWeight: '700' },
-  chipNewText: { color: '#16a34a' },
-  chipUsedText: { color: '#f87171' },
+  chipAvailableText: { color: '#16a34a' },
+  chipUnavailableText: { color: '#f87171' },
   featuresRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   featureChip: {
     backgroundColor: 'rgba(220,38,38,0.12)',

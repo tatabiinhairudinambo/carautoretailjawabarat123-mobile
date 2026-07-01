@@ -31,6 +31,12 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Izinkan $(PRODUCT_NAME) untuk menggunakan lokasi Anda guna menemukan layanan rental mobil terdekat."
+        }
       ]
     ]
   }

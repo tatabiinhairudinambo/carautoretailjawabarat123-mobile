@@ -13,12 +13,14 @@ import {
   Image,
   Animated,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import * as Location from 'expo-location';
 import TestimonialCard from '../../components/TestimonialCard';
 import AnimatedCard from '../../components/AnimatedCard';
 
@@ -93,11 +95,59 @@ export default function HomeScreen() {
   const [promoCars, setPromoCars] = useState<any[]>(PROMO_CARS_FALLBACK);
   const [locModalVisible, setLocModalVisible] = useState(false);
   const [selectedLoc, setSelectedLoc] = useState(LOCATIONS[0]);
+  const [isLocating, setIsLocating] = useState(false);
   const isSmall = SCREEN_W < 375;
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const promoRef = React.useRef<FlatList>(null);
   const promoIndexRef = React.useRef(0);
+
+  // Ambil lokasi GPS saat mount
+  useEffect(() => {
+    getCurrentLocation(false); // false berarti otomatis (tidak dimintai oleh user secara langsung), sehingga jika gagal/ditolak akan diam-diam saja
+  }, []);
+
+  const getCurrentLocation = async (isUserInitiated = true) => {
+    setIsLocating(true);
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setIsLocating(false);
+        if (isUserInitiated) {
+          Alert.alert('Izin Ditolak', 'Izinkan akses lokasi di pengaturan HP Anda untuk menggunakan fitur ini.');
+        }
+        return;
+      }
+      
+      // Gunakan getCurrentPositionAsync, jika gagal/timeout, bisa fallback ke getLastKnownPosition
+      let location;
+      try {
+        location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      } catch (e) {
+        location = await Location.getLastKnownPositionAsync({});
+        if (!location) throw e; // Lempar error jika last known juga tidak ada
+      }
+
+      let geocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      });
+      
+      if (geocode && geocode.length > 0) {
+        const place = geocode[0];
+        const locationName = `${place.city || place.subregion || place.region || 'Lokasi'}, ${place.isoCountryCode || 'ID'}`;
+        setSelectedLoc(locationName);
+      }
+    } catch (error: any) {
+      if (isUserInitiated) {
+        console.log('Error getting location:', error);
+        const errMsg = error && error.message ? error.message : String(error);
+        Alert.alert('Gagal Mendapatkan Lokasi', errMsg || 'Pastikan GPS (Lokasi) di HP Anda menyala.');
+      }
+    } finally {
+      setIsLocating(false);
+    }
+  };
   const isPausedRef = React.useRef(false);
 
   const headerTranslateY = scrollY.interpolate({
@@ -499,6 +549,23 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+              
+              {/* Tombol Gunakan GPS */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[styles.modalLocItem, { borderBottomWidth: 1, borderBottomColor: '#f1f5f9', marginBottom: 8 }]}
+                onPress={async () => {
+                  await getCurrentLocation(true); // true karena ini ditekan langsung oleh user
+                  setLocModalVisible(false);
+                }}
+                disabled={isLocating}
+              >
+                <Ionicons name="navigate" size={20} color="#3b82f6" />
+                <Text style={[styles.modalLocText, { color: '#3b82f6', fontWeight: '600' }]}>
+                  {isLocating ? 'Mencari lokasi...' : 'Gunakan Lokasi Saat Ini'}
+                </Text>
+              </TouchableOpacity>
+
               {LOCATIONS.map((loc, i) => {
                 const isSelected = loc === selectedLoc;
                 return (
