@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import PageLoader from '../../components/PageLoader';
 
 const contactColors: Record<string, { bg: string; border: string }> = {
   whatsapp: { bg: 'rgba(22,163,74,0.12)', border: 'rgba(22,163,74,0.25)' },
@@ -34,6 +35,12 @@ export default function ContactScreen() {
   const [contactItems, setContactItems] = useState<any[]>([]);
   const [whatsappNumber, setWhatsappNumber] = useState('6281234567890');
   const [contactLoading, setContactLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     supabase.from('contact_info').select('*').order('sort_order', { ascending: true }).then(({ data }) => {
@@ -93,11 +100,7 @@ export default function ContactScreen() {
           </View>
 
           {/* Contact Cards */}
-          {contactLoading ? (
-            <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#475569', fontSize: 13 }}>Memuat kontak...</Text>
-            </View>
-          ) : (
+          {!(contactLoading || !minLoadDone) && (
           <View style={[styles.contactGrid, isSmall && { gap: 6, padding: 12, paddingBottom: 0 }]}>
             {contactItems.map((item) => {
               const colors = contactColors[item.key] || { bg: 'rgba(100,116,139,0.12)', border: 'rgba(100,116,139,0.25)' };
@@ -197,6 +200,9 @@ export default function ContactScreen() {
           <View style={{ height: 24 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Full-screen page loader overlay */}
+      {(contactLoading || !minLoadDone) && <PageLoader text="Memuat kontak..." />}
     </SafeAreaView>
   );
 }

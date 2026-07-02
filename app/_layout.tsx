@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 // Apply global Arial font
 const font = Platform.select({ web: 'Arial, sans-serif', ios: 'Arial', android: 'sans-serif' });
@@ -22,7 +22,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="auth/login" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="auth/Silahkan Masuk" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="auth/register" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="profile" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="verify" options={{ animation: 'slide_from_right' }} />
@@ -32,26 +32,12 @@ export default function RootLayout() {
       </Stack>
 
       {!ready && (
-        <View style={[StyleSheet.absoluteFillObject, splash.container]}>
-          <View style={splash.iconWrap}>
-            <Ionicons name="car-sport" size={48} color="#dc2626" />
-          </View>
-          <Text style={splash.title}>CarAutoRetail</Text>
-          <Text style={splash.sub}>Jawa Barat</Text>
-          <ActivityIndicator size="small" color="#dc2626" style={{ marginTop: 32 }} />
+        <View style={StyleSheet.absoluteFillObject}>
+          <PageLoader text="Menyiapkan aplikasi..." />
         </View>
       )}
     </View>
   );
 }
 
-const splash = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0f1e', alignItems: 'center', justifyContent: 'center' },
-  iconWrap: {
-    width: 88, height: 88, borderRadius: 24,
-    backgroundColor: 'rgba(220,38,38,0.12)', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(220,38,38,0.25)', marginBottom: 20,
-  },
-  title: { fontSize: 28, fontWeight: '900', color: '#f1f5f9', letterSpacing: 1 },
-  sub: { fontSize: 14, color: '#cbd5e1', marginTop: 4, fontWeight: '600', letterSpacing: 2 },
-});
+const styles = StyleSheet.create({});

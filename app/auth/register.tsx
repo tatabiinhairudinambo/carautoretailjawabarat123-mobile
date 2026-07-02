@@ -11,6 +11,7 @@ import {
   Platform,
   useWindowDimensions,
   Animated,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -57,7 +58,7 @@ export default function RegisterScreen() {
       Alert.alert(
         'Berhasil Daftar!',
         'Akun berhasil dibuat. Silakan cek email untuk verifikasi, atau langsung masuk.',
-        [{ text: 'OK', onPress: () => router.push('/auth/login') }]
+        [{ text: 'OK', onPress: () => router.push('/auth/Silahkan Masuk') }]
       );
     }
   };
@@ -71,9 +72,13 @@ export default function RegisterScreen() {
             {/* Header */}
             <View style={styles.headerSection}>
               <View style={styles.logoWrap}>
-                <Ionicons name="person-add" size={isSmall ? 32 : 40} color="#fbbf24" style={styles.neonGlow} />
+                <Image
+                  source={require('../../assets/logo.jpg')}
+                  style={styles.logoImg}
+                  resizeMode="cover"
+                />
               </View>
-              <Text style={styles.brandName}>Car Auto Retail</Text>
+              <Text style={styles.brandName}>Car Auto Garage</Text>
               <Text style={[styles.title, isSmall && { fontSize: 24 }]}>Daftar VIP</Text>
               <Text style={[styles.subtitle, isSmall && { fontSize: 13 }]}>Bergabung untuk akses eksklusif layanan rental mobil eksekutif.</Text>
             </View>
@@ -149,10 +154,10 @@ export default function RegisterScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Login Link */}
+            {/* Silahkan Masuk Link */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>Sudah menjadi Member VIP? </Text>
-              <TouchableOpacity onPress={() => router.push('/auth/login')}>
+              <TouchableOpacity onPress={() => router.push('/auth/Silahkan Masuk')}>
                 <Text style={styles.footerLink}>Masuk</Text>
               </TouchableOpacity>
             </View>
@@ -178,15 +183,22 @@ const styles = StyleSheet.create({
   
   headerSection: { alignItems: 'center', marginBottom: 28 },
   logoWrap: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center',
-    marginBottom: 16, borderWidth: 1, borderColor: 'rgba(220, 38, 38, 0.5)',
-    shadowColor: '#dc2626', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8,
+    width: 88, height: 88, borderRadius: 22,
+    overflow: 'hidden',
+    marginBottom: 16,
+    borderWidth: 2.5,
+    borderColor: 'rgba(220,38,38,0.55)',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 10,
   },
-  neonGlow: {
-    textShadowColor: 'rgba(251, 191, 36, 0.5)',
-    textShadowRadius: 8,
+  logoImg: {
+    width: '100%',
+    height: '100%',
   },
+  neonGlow: {},
   brandName: {
     fontSize: 12, fontWeight: '800', color: '#fbbf24', letterSpacing: 2,
     marginBottom: 8, textTransform: 'uppercase',

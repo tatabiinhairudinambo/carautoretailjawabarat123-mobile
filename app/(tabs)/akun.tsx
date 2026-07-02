@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import AnimatedCard from '../../components/AnimatedCard';
+import PageLoader from '../../components/PageLoader';
 
 export default function AkunScreen() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function AkunScreen() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const [sheetVisible, setSheetVisible] = useState(false);
@@ -42,6 +44,8 @@ export default function AkunScreen() {
 
   useEffect(() => {
     loadUser();
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const loadUser = async () => {
@@ -129,7 +133,7 @@ export default function AkunScreen() {
         style: 'destructive',
         onPress: async () => {
           await supabase.auth.signOut();
-          router.replace('/auth/login');
+          router.replace('/auth/Silahkan Masuk');
         },
       },
     ]);
@@ -172,11 +176,7 @@ export default function AkunScreen() {
           </ImageBackground>
         </Animated.View>
 
-        {loading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator size="large" color="#dc2626" />
-          </View>
-        ) : (
+        {!(loading || !minLoadDone) && (
           <View style={styles.content}>
             {/* Profile Card */}
             <AnimatedCard delay={100} style={styles.profileCard}>
@@ -250,7 +250,7 @@ export default function AkunScreen() {
                 onPress={async () => {
                   try {
                     await Share.share({
-                      message: 'Sewa mobil terpercaya di Jawa Barat — Car Auto Retail!\n\nDownload sekarang: https://carautoretail.app',
+                      message: 'Sewa mobil terpercaya di Jawa Barat — Car Auto Garage!\n\nDownload sekarang: https://carautoretail.app',
                     });
                   } catch { }
                 }}
@@ -308,10 +308,13 @@ export default function AkunScreen() {
             </View>
 
             {/* Footer */}
-            <Text style={styles.footerText}>Car Auto Retail Jawa Barat v1.0</Text>
+            <Text style={styles.footerText}>Car Auto Garage Jawa Barat v1.0</Text>
           </View>
         )}
       </Animated.ScrollView>
+
+      {/* Full-screen page loader overlay */}
+      {(loading || !minLoadDone) && <PageLoader text="Memuat profil..." />}
 
       {/* Sleek Action Sheet Modal */}
       {sheetVisible && (

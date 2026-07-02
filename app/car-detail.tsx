@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
@@ -17,6 +18,12 @@ export default function CarDetailScreen() {
   const isSmall = SCREEN_W < 375;
   const [car, setCar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if ((id && id !== '') || (name && name !== '')) loadCar();
@@ -44,11 +51,11 @@ export default function CarDetailScreen() {
   const formatPrice = (price: number) =>
     'Rp ' + new Intl.NumberFormat('id-ID').format(price);
 
-  if (loading) {
+  if (loading || !minLoadDone) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.center}><ActivityIndicator size="large" color="#dc2626" /></View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <PageLoader text="Memuat detail armada..." />
+      </View>
     );
   }
 

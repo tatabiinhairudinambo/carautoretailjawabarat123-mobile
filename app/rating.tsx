@@ -104,7 +104,7 @@ export default function RatingScreen() {
             <Text style={[styles.inputLabel, isSmall && { fontSize: 11 }]}>Tulis Review (opsional)</Text>
             <TextInput
               style={[styles.input, isSmall && { fontSize: 13, minHeight: 80 }]}
-              placeholder="Ceritakan pengalaman Anda menyewa di Car Auto Retail..."
+              placeholder="Ceritakan pengalaman Anda menyewa di Car Auto Garage..."
               placeholderTextColor="#475569"
               value={review}
               onChangeText={setReview}

@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 interface Order {
   id: string;
@@ -38,10 +39,13 @@ export default function HistoryScreen() {
   const isSmall = SCREEN_W < 375;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadOrders();
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const loadOrders = async () => {
@@ -82,12 +86,7 @@ export default function HistoryScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        {loading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#dc2626" />
-            <Text style={styles.loadingText}>Memuat riwayat...</Text>
-          </View>
-        ) : orders.length === 0 ? (
+        {!(loading || !minLoadDone) && orders.length === 0 ? (
           <View style={styles.emptyWrap}>
             <View style={styles.emptyIcon}>
               <Ionicons name="receipt-outline" size={48} color="#334155" />
@@ -139,6 +138,9 @@ export default function HistoryScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Full-screen page loader overlay */}
+      {(loading || !minLoadDone) && <PageLoader text="Memuat riwayat..." />}
     </SafeAreaView>
   );
 }

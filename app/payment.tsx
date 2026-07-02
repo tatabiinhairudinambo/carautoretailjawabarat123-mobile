@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
@@ -25,6 +26,7 @@ export default function PaymentScreen() {
   
   const [car, setCar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [days, setDays] = useState('1');
   const [paymentMethod, setPaymentMethod] = useState('bca');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,6 +36,8 @@ export default function PaymentScreen() {
   useEffect(() => {
     if (id && id !== '') loadCar();
     else setLoading(false);
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, [id]);
 
   const loadCar = async () => {
@@ -79,11 +83,11 @@ Mohon panduannya untuk proses verifikasi. Terima kasih!`;
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
   };
 
-  if (loading) {
+  if (loading || !minLoadDone) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.center}><ActivityIndicator size="large" color="#fbbf24" /></View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <PageLoader text="Memuat pembayaran..." />
+      </View>
     );
   }
 

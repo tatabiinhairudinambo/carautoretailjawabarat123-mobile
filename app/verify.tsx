@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 export default function VerifyScreen() {
   const router = useRouter();
@@ -20,11 +21,14 @@ export default function VerifyScreen() {
   const [address, setAddress] = useState('');
   const [occupation, setOccupation] = useState('');
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     loadUserData();
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const loadUserData = async () => {
@@ -65,11 +69,11 @@ export default function VerifyScreen() {
     }
   };
 
-  if (loading) {
+  if (loading || !minLoadDone) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <ActivityIndicator size="large" color="#dc2626" style={{ marginTop: 60 }} />
-      </SafeAreaView>
+      <View style={styles.container}>
+        <PageLoader text="Memuat data akun..." />
+      </View>
     );
   }
 
@@ -83,7 +87,7 @@ export default function VerifyScreen() {
               <View style={styles.logoWrap}>
                 <Ionicons name="shield-checkmark" size={isSmall ? 28 : 36} color="#dc2626" />
               </View>
-              <Text style={styles.brandName}>CarAutoRetail</Text>
+              <Text style={styles.brandName}>Car Auto Garage</Text>
               <Text style={[styles.title, isSmall && { fontSize: 20 }]}>Verifikasi Akun</Text>
               <Text style={[styles.subtitle, isSmall && { fontSize: 12 }]}>
                 Lengkapi data diri untuk menyewa armada

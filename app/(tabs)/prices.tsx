@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import PageLoader from '../../components/PageLoader';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
@@ -59,6 +60,7 @@ export default function PricesScreen() {
   const [prices, setPrices] = useState<PriceCategory[]>([]);
   const [selectedCat, setSelectedCat] = useState<string>('Semua');
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -77,6 +79,8 @@ export default function PricesScreen() {
 
   useEffect(() => {
     loadPrices();
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const onRefresh = async () => {
@@ -179,12 +183,7 @@ export default function PricesScreen() {
           </Text>
         </View>
 
-        {loading ? (
-          <View style={[styles.center, { padding: 40 }]}>
-            <ActivityIndicator size="large" color="#dc2626" />
-            <Text style={styles.loadingText}>Memuat harga...</Text>
-          </View>
-        ) : (
+        {!(loading || !minLoadDone) && (
           <>
             {/* VIP Catalogue Book Chapters */}
             {prices.filter(cat => selectedCat === 'Semua' || cat.category === selectedCat).map((cat, catIdx) => (
@@ -265,6 +264,9 @@ export default function PricesScreen() {
 
         <View style={{ height: 24 }} />
       </Animated.ScrollView>
+
+      {/* Full-screen page loader overlay */}
+      {(loading || !minLoadDone) && <PageLoader text="Memuat daftar harga..." />}
     </View>
   );
 }

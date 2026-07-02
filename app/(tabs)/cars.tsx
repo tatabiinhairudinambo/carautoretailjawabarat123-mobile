@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import * as Location from 'expo-location';
 import CarCard from '../../components/CarCard';
+import PageLoader from '../../components/PageLoader';
 import { isSmall, SCREEN_W, scaleFont } from '../../lib/responsive';
 
 const BRANDS = ['Semua', 'Toyota', 'Daihatsu', 'Honda', 'Suzuki', 'Mitsubishi'];
@@ -30,6 +31,7 @@ const SORT_OPTIONS = ['Default', 'Harga Terendah', 'Harga Tertinggi', 'Tahun Ter
 export default function CarsScreen() {
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Semua');
@@ -59,6 +61,8 @@ export default function CarsScreen() {
   useEffect(() => {
     loadCars();
     getCurrentLocation(false);
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const getCurrentLocation = async (isUserInitiated = true) => {
@@ -280,11 +284,8 @@ export default function CarsScreen() {
         </ImageBackground>
       </Animated.View>
 
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#dc2626" />
-          <Text style={styles.loadingText}>Memuat armada...</Text>
-        </View>
+      {(loading || !minLoadDone) ? (
+        <PageLoader text="Memuat armada..." />
       ) : (
         <Animated.FlatList
           data={filtered}

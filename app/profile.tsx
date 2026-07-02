@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
+import PageLoader from '../components/PageLoader';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function ProfileScreen() {
   const [email, setEmail] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(true);
+  const [minLoadDone, setMinLoadDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [sheetVisible, setSheetVisible] = useState(false);
@@ -25,6 +27,8 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     loadProfile();
+    const t = setTimeout(() => setMinLoadDone(true), 5000);
+    return () => clearTimeout(t);
   }, []);
 
   const loadProfile = async () => {
@@ -156,14 +160,11 @@ export default function ProfileScreen() {
     }, 2000);
   };
 
-  if (loading) {
+  if (loading || !minLoadDone) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
-        <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color="#dc2626" />
-        </View>
-      </SafeAreaView>
+      <View style={[styles.container, { flex: 1 }]}>
+        <PageLoader text="Memuat profil..." />
+      </View>
     );
   }
 

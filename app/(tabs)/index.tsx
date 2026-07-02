@@ -24,6 +24,7 @@ import { supabase } from '../../lib/supabase';
 import * as Location from 'expo-location';
 import TestimonialCard from '../../components/TestimonialCard';
 import AnimatedCard from '../../components/AnimatedCard';
+import PageLoader from '../../components/PageLoader';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
@@ -184,9 +185,9 @@ export default function HomeScreen() {
 
   const loadUserData = async () => {
     try {
-      const savedAvatar = await AsyncStorage.getItem('user_avatar');
+      const savedAvatar = await AsyncStorage.getItem('@vip_avatar_url');
       if (savedAvatar) setAvatarUrl(savedAvatar);
-      const savedName = await AsyncStorage.getItem('user_full_name');
+      const savedName = await AsyncStorage.getItem('@vip_full_name');
       if (savedName) setUserName(savedName);
 
       const { data } = await supabase.auth.getUser();
@@ -235,12 +236,12 @@ export default function HomeScreen() {
   };
 
   const openWhatsApp = () => {
-    const msg = 'Halo Car Auto Retail, saya ingin informasi tentang rental mobil Anda.';
+    const msg = 'Halo Car Auto Garage, saya ingin informasi tentang rental mobil Anda.';
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
   };
 
   const claimPromo = () => {
-    const msg = 'Halo Car Auto Retail, saya ingin klaim promo penawaran spesial diskon 25%!';
+    const msg = 'Halo Car Auto Garage, saya ingin klaim promo penawaran spesial diskon 25%!';
     Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
   };
 
@@ -275,7 +276,7 @@ export default function HomeScreen() {
           <SafeAreaView edges={['top']} style={[styles.stickyBarContent, { justifyContent: 'space-between' }]}>
             <View style={styles.stickyTitleRow}>
               {/* <Image source={require('../../assets/logo.jpg')} style={styles.stickyMiniLogo} resizeMode="cover" /> */}
-              <Text style={styles.stickyBarTitle}>Car Auto Retail</Text>
+              <Text style={styles.stickyBarTitle}>Car Auto Garage</Text>
             </View>
 
             <TouchableOpacity style={styles.avatarWrapSmall} onPress={() => router.push('/akun')}>
@@ -334,7 +335,7 @@ export default function HomeScreen() {
 
               <Animated.View style={[styles.balanceCenterWrap, { opacity: headerTextOpacity, transform: [{ scale: headerTextScale }] }]}>
                 <Text style={styles.balanceLabel}>Pusat Rental Mobil Eksekutif</Text>
-                <Text style={[styles.balanceValue, isSmall && { fontSize: 32 }]}>Car Auto Retail</Text>
+                <Text style={[styles.balanceValue, isSmall && { fontSize: 32 }]}>Car Auto Garage</Text>
               </Animated.View>
             </SafeAreaView>
           </ImageBackground>

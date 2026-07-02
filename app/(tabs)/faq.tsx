@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const FAQ_DATA = [
@@ -27,17 +27,27 @@ const FAQ_DATA = [
 
 export default function FAQScreen() {
   const [expandedIndex, setExpandedIndex] = React.useState<number | null>(0);
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(24)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim,  { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+    ]).start();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f1e" />
-      <View style={styles.header}>
-        <Ionicons name="help-buoy" size={48} color="#3b82f6" style={{ marginBottom: 12 }} />
-        <Text style={styles.headerTitle}>Bantuan & FAQ</Text>
-        <Text style={styles.headerSubtitle}>Temukan jawaban untuk pertanyaan yang sering diajukan</Text>
-      </View>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <View style={styles.header}>
+          <Ionicons name="help-buoy" size={48} color="#3b82f6" style={{ marginBottom: 12 }} />
+          <Text style={styles.headerTitle}>Bantuan & FAQ</Text>
+          <Text style={styles.headerSubtitle}>Temukan jawaban untuk pertanyaan yang sering diajukan</Text>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Visi Misi Section */}
         <View style={styles.vmContainer}>
           <View style={styles.vmCard}>
@@ -88,7 +98,8 @@ export default function FAQScreen() {
           );
         })}
         <View style={{ height: 100 }} />
-      </ScrollView>
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
